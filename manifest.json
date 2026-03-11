@@ -1,0 +1,42 @@
+{
+  "name": "ගමට උසාවිය — Gamata Usaviya",
+  "short_name": "ගමට උසාවිය",
+  "description": "Rural Legal Aid Case Management System — Sri Lanka",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D1B2A",
+  "theme_color": "#0B6E7A",
+  "lang": "si",
+  "categories": ["legal", "government", "productivity"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Case",
+      "short_name": "නව නඩුව",
+      "url": "./index.html#newcase",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Track Case",
+      "short_name": "නඩු සොයන්න",
+      "url": "./index.html#track",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}
