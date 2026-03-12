@@ -721,8 +721,11 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <button class="nav-tab" onclick="showTab('track')">🔍 Track</button>
     </div>
     <div class="topbar-right">
-      <div class="ai-engine-badge" onclick="openSettings()" title="AI Engine Settings" id="ai-engine-indicator">
+      <div class="ai-engine-badge admin-only" onclick="openSettings()" title="AI Engine Settings" id="ai-engine-indicator" style="display:none;">
         <div class="dot"></div><span id="ai-engine-label">Groq</span> ⚙
+      </div>
+      <div class="ai-engine-badge officer-only" id="ai-indicator-officer" style="cursor:default;">
+        <div class="dot"></div><span>AI</span>
       </div>
       <div class="officer-badge" id="user-badge">🧑‍💼 FO-KANDY-001</div>
       <button class="btn-secondary" onclick="logout()" style="padding:7px 14px;font-size:0.8rem;">Sign Out</button>
@@ -1502,7 +1505,7 @@ function showTab(tab) {
 // ══════════════════════════════════
 //  GOOGLE SHEETS AUTH
 // ══════════════════════════════════
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzGrAXeK6if1PAhNq0pOLrXouWzY_cfFOXt-gb5eRmNzq9GG4IWaLPp_FAq-skLciiJ/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxB73xY0UCYSNHxU5HX7LXboC96XWgJO0jIlUQPu9PnDyHtbMNGfMVmcUUdkpkj4eHm/exec';
 const APP_SECRET = 'gamatausaviya2025';
 
 async function callSheets(payload) {
@@ -1556,9 +1559,14 @@ async function doLogin() {
       document.querySelectorAll('.admin-only').forEach(e =>
         e.style.display = user.role==='admin' ? '' : 'none'
       );
+      // Show correct AI badge
+      const officerBadge = document.getElementById('ai-indicator-officer');
+      if (officerBadge) officerBadge.style.display = user.role==='admin' ? 'none' : '';
 
       showScreen('app');
       showTab('dashboard');
+      // Load cases from Google Sheets
+      loadCasesFromSheets();
     } else {
       errEl.textContent = result.error || 'Login failed. Please try again.';
       errEl.style.display = 'block';
@@ -1578,6 +1586,8 @@ async function doLogin() {
       document.getElementById('user-badge').textContent = (match.role==='admin'?'🛡 ':'🧑‍💼 ')+match.name;
       document.getElementById('officer-name-display').textContent = match.name;
       document.querySelectorAll('.admin-only').forEach(el => el.style.display = match.role==='admin'?'':'none');
+      const ob = document.getElementById('ai-indicator-officer');
+      if (ob) ob.style.display = match.role==='admin' ? 'none' : '';
       showScreen('app'); showTab('dashboard');
       showOfflineBanner('Logged in offline using cached credentials.');
     } else {
@@ -1611,6 +1621,40 @@ function logout() {
   document.getElementById('login-btn').style.display='block';
   document.getElementById('login-spinner').style.display='none';
   showScreen('login');
+}
+
+// ── Load cases from Google Sheets on login ──
+async function loadCasesFromSheets() {
+  try {
+    const result = await callSheets({
+      action: 'listCases',
+      district: currentDistrict || 'All'
+    });
+    if (result.ok && result.cases && result.cases.length > 0) {
+      // Merge sheet cases with local — sheet cases take priority
+      const sheetTokens = result.cases.map(c => c.token);
+      // Remove local copies of cases that exist in sheet
+      cases = cases.filter(c => !sheetTokens.includes(c.token));
+      // Add sheet cases (map to app format)
+      const sheetCases = result.cases.map(c => ({
+        id: c.token, token: c.token,
+        client: c.client, nic: c.nic, mobile: c.mobile,
+        district: c.district, caseType: c.caseType,
+        status: c.status, officer: c.officer,
+        created: c.created, court: c.court,
+        route: c.route, facts: c.facts,
+        aiSummary: c.aiSummary, petition: c.petition,
+        lawyer: c.lawyer ? { name: c.lawyer } : null,
+        folderUrl: c.folderUrl,
+        files: [], driveFiles: [],
+        history: [{date: c.created, event: 'Case loaded from Google Drive', by: 'System'}]
+      }));
+      cases = [...sheetCases, ...cases];
+      renderDashboard();
+    }
+  } catch(e) {
+    console.log('Could not load cases from Sheets — offline mode');
+  }
 }
 
 function trackCase() {
@@ -2082,16 +2126,24 @@ function buildReview(){
 }
 
 // ── Submit case + trigger AI summary ──
-function submitCase(){
+async function submitCase(){
   if(!document.getElementById('confirm-check1').checked||!document.getElementById('confirm-check2').checked||!document.getElementById('confirm-check3').checked){
     alert('Please tick all three confirmation checkboxes before submitting.');return;
   }
+
+  // Disable button and show saving state
+  const btn = document.querySelector('[onclick="submitCase()"]');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Saving to Google Drive…'; }
+
   const token='GU-'+new Date().getFullYear()+'-'+String(100000+cases.length+1).slice(1);
+  const clientName = document.getElementById('c-name')?.value||'Unknown';
+
   const newCase={
-    id:token,token,
-    client:document.getElementById('c-name')?.value||'Unknown',
+    id:token, token,
+    client:clientName,
     nic:document.getElementById('c-nic')?.value||'',
     mobile:document.getElementById('c-mobile')?.value||'',
+    address:document.getElementById('c-address')?.value||'',
     district:document.getElementById('c-district')?.value||'',
     caseType:selectedCaseType||'other',
     caseSubtype:document.getElementById('case-subtype')?.value||'',
@@ -2113,25 +2165,90 @@ function submitCase(){
     lawyer:selectedLawyer||null,
     status:'Pending',
     officer:currentUser,
+    officerName:currentUserName||currentUser,
     lang:document.getElementById('c-lang')?.value||'si',
     contactPref:document.getElementById('c-contact-pref')?.value||'WhatsApp',
     files:uploadedFiles.map(f=>({name:f.name,size:f.size,type:f.type,dataUrl:f.dataUrl})),
     fileNames:uploadedFiles.map(f=>f.name),
+    driveFiles:[],
     created:new Date().toISOString().split('T')[0],
     aiSummary:'',
     petition:'',
+    folderUrl:'',
     history:[
-      {date:new Date().toISOString().split('T')[0],event:`Case registered by Field Officer ${currentUser}`,by:currentUser},
-      {date:new Date().toISOString().split('T')[0],event:`${uploadedFiles.length} document(s) uploaded and stored digitally`,by:'System'},
+      {date:new Date().toISOString().split('T')[0],event:`Case registered by Field Officer ${currentUserName||currentUser}`,by:currentUser},
+      {date:new Date().toISOString().split('T')[0],event:`${uploadedFiles.length} document(s) uploaded`,by:'System'},
       {date:new Date().toISOString().split('T')[0],event:`Case file dispatched to: ${caseForm.route||'Government Legal Aid Commission'}`,by:'System'},
-      {date:new Date().toISOString().split('T')[0],event:`${document.getElementById('c-contact-pref')?.value||'WhatsApp'} notification sent to client`,by:'System'},
     ]
   };
+
   if(selectedLawyer){
-    newCase.history.push({date:new Date().toISOString().split('T')[0],event:`Case file sent to ${selectedLawyer.name} (${selectedLawyer.reg}) — ${selectedLawyer.district}`,by:'System'});
+    newCase.history.push({date:new Date().toISOString().split('T')[0],event:`Case assigned to ${selectedLawyer.name} (${selectedLawyer.reg})`,by:'System'});
   }
+
+  // ── 1. Save case to Google Sheets ──
+  try {
+    const saveResult = await callSheets({
+      action:     'saveCase',
+      token:      newCase.token,
+      clientName: newCase.client,
+      nic:        newCase.nic,
+      mobile:     newCase.mobile,
+      district:   newCase.district,
+      caseType:   newCase.caseType,
+      status:     'Pending',
+      officer:    newCase.officer,
+      created:    newCase.created,
+      court:      newCase.court,
+      route:      newCase.route,
+      facts:      newCase.facts,
+      lawyer:     newCase.lawyer ? newCase.lawyer.name + ' (' + newCase.lawyer.reg + ')' : ''
+    });
+    if(saveResult.ok){
+      newCase.folderUrl = saveResult.folderUrl || '';
+      newCase.history.push({date:newCase.created, event:'Case saved to Google Drive ✓', by:'System'});
+    } else {
+      newCase.history.push({date:newCase.created, event:'Drive save failed: '+saveResult.error, by:'System'});
+    }
+  } catch(e) {
+    newCase.history.push({date:newCase.created, event:'Offline — case saved locally only', by:'System'});
+  }
+
+  // ── 2. Upload files to Google Drive ──
+  if(uploadedFiles.length > 0){
+    if(btn) btn.textContent = '⏳ Uploading ' + uploadedFiles.length + ' file(s) to Drive…';
+    for(let i = 0; i < uploadedFiles.length; i++){
+      const f = uploadedFiles[i];
+      try {
+        // Strip data URL prefix to get pure base64
+        const base64 = f.dataUrl ? f.dataUrl.split(',')[1] : null;
+        if(!base64) continue;
+        const upResult = await callSheets({
+          action:     'uploadFile',
+          token:      newCase.token,
+          clientName: newCase.client,
+          filename:   f.name,
+          mimeType:   f.type || 'application/octet-stream',
+          base64data: base64
+        });
+        if(upResult.ok){
+          newCase.driveFiles.push({
+            name:    f.name,
+            viewUrl: upResult.viewUrl,
+            fileId:  upResult.fileId
+          });
+          newCase.history.push({date:newCase.created, event:'File uploaded to Drive: '+f.name+' ✓', by:'System'});
+        }
+      } catch(e) {
+        newCase.history.push({date:newCase.created, event:'File upload failed: '+f.name, by:'System'});
+      }
+    }
+  }
+
+  // ── 3. Show token screen ──
   cases.unshift(newCase);
-  currentCaseForSummary=newCase;
+  currentCaseForSummary = newCase;
+  if(btn){ btn.disabled=false; btn.textContent='✓ Issue Token & Submit'; }
   renderTokenReceipt(newCase);
   goWStep(7);
   generateAISummary(newCase);
@@ -2155,6 +2272,7 @@ function renderTokenReceipt(c){
         ${c.lawyer?`<div class="token-row"><span class="token-key">Lawyer Assigned</span><span class="token-val">${c.lawyer.name} · ${c.lawyer.reg} · ${c.lawyer.district}</span></div>`:''}
         ${c.council?`<div class="token-row"><span class="token-key">Council Copy</span><span class="token-val">${c.council}</span></div>`:''}
         <div class="token-row"><span class="token-key">Files Stored</span><span class="token-val">${c.files.length} file(s): ${c.files.map(f=>f.name||f).join(', ')}</span></div>
+        ${c.folderUrl?`<div class="token-row"><span class="token-key">📁 Drive Folder</span><span class="token-val"><a href="${c.folderUrl}" target="_blank" style="color:var(--teal-bright);">View files in Google Drive →</a></span></div>`:''}
         <div class="token-row"><span class="token-key">Status</span><span class="token-val">${statusPill('Pending')}</span></div>
         <div class="token-row"><span class="token-key">Registered By</span><span class="token-val">${c.officer}</span></div>
         <div class="token-row"><span class="token-key">Date</span><span class="token-val">${c.created}</span></div>
@@ -2212,7 +2330,12 @@ function updateEngineLabel() {
   if (lbl) lbl.textContent = labels[aiProvider]||aiProvider;
   if (dot) dot.style.background = (aiProvider==='groq'||aiProvider==='offline') ? 'var(--green-bright)' : 'var(--gold)';
 }
-function openSettings() { document.getElementById('settings-modal').classList.add('open'); loadSavedKeys(); if(aiProvider==='ollama') pingOllama(); }
+function openSettings() {
+  if (currentRole !== 'admin') return;
+  document.getElementById('settings-modal').classList.add('open');
+  loadSavedKeys();
+  if(aiProvider==='ollama') pingOllama();
+}
 function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
 function saveSettings() { closeSettings(); }
 
@@ -2241,7 +2364,7 @@ async function callAI(prompt) {
   }
   if (aiProvider==='groq') {
     const key = localStorage.getItem('gu_groq_key') || document.getElementById('groq-key')?.value || '';
-    if (!key) return '[Groq key not set]\n\nClick ⚙ top-right → paste your free Groq key from console.groq.com';
+    if (!key) throw new Error('Groq key not set — click ⚙ top-right to add your free key from console.groq.com');
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
@@ -2309,9 +2432,11 @@ Format: 1.CASE REFERENCE & PARTIES 2.NATURE OF DISPUTE 3.KEY FACTS (numbered) 4.
     document.getElementById('summary-actions').style.display='flex';
     document.getElementById('print-client-btn').style.display='inline-flex';
     document.getElementById('generate-petition-btn').style.display='inline-flex';
+    // Save summary back to Google Sheets
+    try { await callSheets({ action:'updateCase', token:c.token, aiSummary:text }); } catch(e) {}
   } catch(e) {
     const isOllama = e.message?.includes('Ollama')||e.message?.includes('fetch')||e.message?.includes('Failed');
-    document.getElementById('ai-summary-content').innerHTML=`<div style="color:var(--gold);font-size:0.85rem;line-height:1.7;"><strong>⚠ ${e.message||'Error'}</strong><br>${isOllama?'Is Ollama running? Open terminal → <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">ollama serve</code>':''}<br><br><button class="btn-sm btn-sm-teal" onclick="regenerateSummary()">↺ Retry</button> <button class="btn-sm btn-sm-gold" style="margin-left:6px;" onclick="openSettings()">⚙ Change Engine</button></div>`;
+    document.getElementById('ai-summary-content').innerHTML=`<div style="color:var(--gold);font-size:0.85rem;line-height:1.7;"><strong>⚠ ${e.message||'Error'}</strong><br>${isOllama?'Is Ollama running? Open terminal → <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">ollama serve</code>':''}<br><br><button class="btn-sm btn-sm-teal" onclick="regenerateSummary()">↺ Retry</button> ${currentRole==='admin'?'<button class="btn-sm btn-sm-gold" style="margin-left:6px;" onclick="openSettings()">⚙ Change Engine</button>':''}</div>`;
     document.getElementById('print-client-btn').style.display='inline-flex';
     document.getElementById('generate-petition-btn').style.display='inline-flex';
   }
@@ -2466,11 +2591,13 @@ Petitioner / Petitioner's Officer`;
     document.getElementById('petition-content').innerHTML = `<div class="ai-summary-text" style="font-family:'Courier New',monospace;font-size:0.82rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;padding:16px;max-height:400px;overflow-y:auto;white-space:pre-wrap;line-height:1.8;">${text}</div>`;
     document.getElementById('petition-actions').style.display = 'flex';
     document.getElementById('print-petition-btn').style.display = 'inline-flex';
+    // Save petition back to Google Sheets
+    try { await callSheets({ action:'updateCase', token:c.token, petition:text }); } catch(e) {}
   } catch(e) {
     document.getElementById('petition-content').innerHTML = `<div style="color:var(--gold);font-size:0.85rem;line-height:1.7;">
       <strong>⚠ ${e.message||'Error generating petition'}</strong><br><br>
       <button class="btn-sm btn-sm-teal" onclick="regeneratePetition()">↺ Retry</button>
-      <button class="btn-sm btn-sm-gold" style="margin-left:6px;" onclick="openSettings()">⚙ Change AI Engine</button>
+      ${currentRole==='admin'?'<button class="btn-sm btn-sm-gold" style="margin-left:6px;" onclick="openSettings()">⚙ Change AI Engine</button>':''}
     </div>`;
   }
 }
@@ -2478,7 +2605,11 @@ Petitioner / Petitioner's Officer`;
 function printPetition() {
   const c = currentCaseForSummary;
   if (!c) { alert('No case loaded.'); return; }
-  const text = currentPetitionText || c.petition || 'Petition not yet generated.';
+  const text = currentPetitionText || c.petition || '';
+  if (!text || text.startsWith('[Groq') || text.startsWith('[Offline') || text.length < 100) {
+    alert('Please generate the court petition first before printing.\n\nClick "Generate Court Petition" and wait for the AI to finish.');
+    return;
+  }
 
   document.getElementById('print-petition-content').innerHTML = `
     <div class="petition-court-header">
