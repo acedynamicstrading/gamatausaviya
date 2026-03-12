@@ -655,23 +655,33 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <span class="login-si">ක්ෂේත්‍ර නිලධාරී පද්ධතිය · அலுவலக அமைப்பு</span>
     </div>
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchLoginTab('officer')">🧑‍💼 Field Officer</button>
-      <button class="login-tab" onclick="switchLoginTab('admin')">🛡 Admin</button>
+      <button class="login-tab active" onclick="switchLoginTab('officer')">🧑‍💼 Sign In</button>
       <button class="login-tab" onclick="switchLoginTab('track')">🔍 Track Case</button>
     </div>
 
+    <!-- SIGN IN -->
     <div id="login-officer">
-      <div class="field"><label>Officer ID</label><input type="text" id="officer-id" placeholder="e.g. FO-KANDY-001" value="FO-KANDY-001"></div>
-      <div class="field"><label>Password</label><input type="password" id="officer-pw" placeholder="••••••••" value="password"></div>
-      <button class="btn-primary" onclick="loginOfficer()">Sign In as Field Officer</button>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Username</label>
+        <input type="text" id="officer-id" placeholder="Enter your username" autocomplete="username">
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>Password</label>
+        <input type="password" id="officer-pw" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div id="login-error" style="display:none;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);border-radius:5px;padding:10px 12px;font-size:0.83rem;color:#e74c3c;margin-bottom:12px;"></div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()" style="width:100%;justify-content:center;">
+        Sign In →
+      </button>
+      <div id="login-spinner" style="display:none;text-align:center;padding:12px;">
+        <div class="ai-spinner-inline" style="justify-content:center;">
+          <div class="ai-spin"></div> Verifying credentials…
+        </div>
+      </div>
     </div>
 
-    <div id="login-admin" style="display:none;">
-      <div class="field"><label>Admin Username</label><input type="text" id="admin-user" placeholder="admin" value="admin"></div>
-      <div class="field"><label>Password</label><input type="password" id="admin-pw" placeholder="••••••••" value="admin"></div>
-      <button class="btn-primary" onclick="loginAdmin()">Sign In as Admin</button>
-    </div>
-
+    <!-- TRACK CASE (public — no login needed) -->
     <div id="login-track" style="display:none;">
       <div class="field">
         <label>Case Token Number</label>
@@ -681,11 +691,12 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
         <label>NIC / Mobile (verification)</label>
         <input type="text" id="track-verify" placeholder="Your NIC or registered mobile">
       </div>
-      <button class="btn-primary" onclick="trackCase()">Track My Case</button>
+      <button class="btn-primary" onclick="trackCase()" style="width:100%;justify-content:center;">Track My Case →</button>
     </div>
 
-    <div class="info-box" style="margin-top:16px;">
-      <strong>Demo credentials:</strong> Any input works in this demo. Field Officer logs in to register new cases. Admin manages all cases.
+    <div class="info-box" style="margin-top:16px;font-size:0.78rem;">
+      🔒 Access is restricted. Contact your administrator if you need an account.<br>
+      <span style="font-family:'Noto Serif Sinhala',serif;font-size:0.75rem;">ප්‍රවේශය සීමිතයි. ගිණුමක් අවශ්‍ය නම් පරිපාලකයා අමතන්න.</span>
     </div>
   </div>
 </div>
@@ -706,6 +717,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
       <button class="nav-tab" onclick="showTab('newcase')">➕ New Case</button>
       <button class="nav-tab admin-only" onclick="showTab('allcases')" style="display:none;">📂 All Cases</button>
+      <button class="nav-tab admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
       <button class="nav-tab" onclick="showTab('track')">🔍 Track</button>
     </div>
     <div class="topbar-right">
@@ -819,6 +831,99 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       </div>
     </div>
 
+    <!-- USERS TAB (admin only) -->
+    <div id="tab-users" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.5rem;">User Management</h2>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Only you can add, edit or remove field officers.</p>
+        </div>
+        <button class="btn-gold" onclick="openAddUser()">+ Add New Officer</button>
+      </div>
+
+      <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:20px;">
+        <div id="users-loading" style="text-align:center;padding:32px;"><div class="ai-spinner-inline" style="justify-content:center;"><div class="ai-spin"></div> Loading users…</div></div>
+        <div id="users-list" style="display:none;">
+          <table class="case-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>District</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT USER MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="user-modal-title">Add New Field Officer</div>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section-title" style="margin-bottom:16px;">Officer Details</div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Username <span style="color:var(--red);">*</span></label>
+        <input type="text" id="um-username" placeholder="e.g. fo_kandy_02" autocomplete="off">
+        <span style="font-size:0.72rem;color:var(--muted);">Lowercase, no spaces. Officer uses this to log in.</span>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Password <span style="color:var(--red);">*</span></label>
+        <input type="text" id="um-password" placeholder="e.g. officer123" autocomplete="off">
+        <span style="font-size:0.72rem;color:var(--muted);">Share this privately with the officer.</span>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Full Name <span style="color:var(--red);">*</span></label>
+        <input type="text" id="um-name" placeholder="e.g. Nimal Perera">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>District <span style="color:var(--red);">*</span></label>
+        <select id="um-district">
+          <option value="">Select district…</option>
+          <option value="All">All Districts (Admin)</option>
+          <option>Colombo</option><option>Gampaha</option><option>Kalutara</option>
+          <option>Kandy</option><option>Matale</option><option>Nuwara Eliya</option>
+          <option>Galle</option><option>Matara</option><option>Hambantota</option>
+          <option>Jaffna</option><option>Kilinochchi</option><option>Mannar</option>
+          <option>Mullaitivu</option><option>Vavuniya</option><option>Trincomalee</option>
+          <option>Batticaloa</option><option>Ampara</option><option>Polonnaruwa</option>
+          <option>Anuradhapura</option><option>Puttalam</option><option>Kurunegala</option>
+          <option>Kegalle</option><option>Ratnapura</option><option>Badulla</option>
+          <option>Monaragala</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Role <span style="color:var(--red);">*</span></label>
+        <select id="um-role">
+          <option value="officer">Field Officer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:20px;" id="um-status-wrap" style="display:none;">
+        <label>Status</label>
+        <select id="um-status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive (blocked)</option>
+        </select>
+      </div>
+      <input type="hidden" id="um-row">
+      <div id="um-error" style="display:none;" class="warn-box"></div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="btn-gold" onclick="saveUser()" id="um-save-btn" style="flex:1;">Save Officer</button>
+        <button class="btn-secondary" onclick="closeUserModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1336,8 +1441,11 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 // ══════════════════════════════════
 //  STATE
 // ══════════════════════════════════
-let currentUser = null;
-let currentRole = 'officer';
+let currentUser     = null;
+let currentRole     = 'officer';
+let currentUserName = null;
+let currentDistrict = null;
+let currentUserRow  = null;
 let currentWStep = 1;
 let caseForm = {};
 let uploadedFiles = []; // stores {name, size, type, dataUrl}
@@ -1378,50 +1486,291 @@ function showScreen(id) {
   document.getElementById('screen-'+id).classList.add('active');
 }
 function showTab(tab) {
-  ['dashboard','newcase','allcases','track'].forEach(t => {
+  ['dashboard','newcase','allcases','track','users'].forEach(t => {
     const el = document.getElementById('tab-'+t);
     if (el) el.style.display = (t===tab)?'block':'none';
   });
   document.querySelectorAll('#app-nav .nav-tab').forEach(b => b.classList.remove('active'));
-  const active = [...document.querySelectorAll('#app-nav .nav-tab')].find(b => b.textContent.toLowerCase().includes(tab.replace('allcases','all')));
+  const active = [...document.querySelectorAll('#app-nav .nav-tab')].find(b => b.textContent.toLowerCase().includes(tab.replace('allcases','all').replace('users','user')));
   if (active) active.classList.add('active');
-  if (tab==='newcase') { showScreen('newcase'); resetWizard(); }
-  if (tab==='allcases') renderAllCases();
+  if (tab==='newcase')   { showScreen('newcase'); resetWizard(); }
+  if (tab==='allcases')  renderAllCases();
   if (tab==='dashboard') renderDashboard();
+  if (tab==='users')     loadUsers();
 }
 
 // ══════════════════════════════════
-//  LOGIN
+//  GOOGLE SHEETS AUTH
 // ══════════════════════════════════
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwjEHQ9GTKMWksCYHoGPhlQfoFDspPoW2JdOlA3t2rrr9eI6uJLA1m9GNsCirusw_Sm/exec';
+const APP_SECRET = 'gamatausaviya2025';
+
+async function callSheets(payload) {
+  const res = await fetch(SHEETS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...payload, secret: APP_SECRET })
+  });
+  return await res.json();
+}
+
 function switchLoginTab(t) {
   document.querySelectorAll('.login-tab').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('login-officer').style.display = t==='officer'?'block':'none';
-  document.getElementById('login-admin').style.display = t==='admin'?'block':'none';
-  document.getElementById('login-track').style.display = t==='track'?'block':'none';
+  document.getElementById('login-track').style.display   = t==='track'?'block':'none';
 }
-function loginOfficer() {
-  const id = document.getElementById('officer-id').value || 'FO-KANDY-001';
-  currentUser=id; currentRole='officer';
-  document.getElementById('user-badge').textContent='🧑‍💼 '+id;
-  document.getElementById('officer-name-display').textContent=id;
-  document.querySelectorAll('.admin-only').forEach(e=>e.style.display='none');
-  showScreen('app'); showTab('dashboard');
+
+async function doLogin() {
+  const username = document.getElementById('officer-id').value.trim();
+  const password = document.getElementById('officer-pw').value.trim();
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+  const spinner  = document.getElementById('login-spinner');
+
+  if (!username || !password) {
+    errEl.textContent = 'Please enter your username and password.';
+    errEl.style.display = 'block'; return;
+  }
+
+  errEl.style.display = 'none';
+  btn.style.display = 'none';
+  spinner.style.display = 'block';
+
+  try {
+    const result = await callSheets({ action: 'login', username, password });
+
+    if (result.ok) {
+      const user = result.user;
+      currentUser     = user.username;
+      currentRole     = user.role;
+      currentUserName = user.name;
+      currentDistrict = user.district;
+      currentUserRow  = user.row;
+
+      document.getElementById('user-badge').textContent =
+        (user.role==='admin'?'🛡 ':'🧑‍💼 ') + user.name;
+      document.getElementById('officer-name-display').textContent = user.name;
+
+      // Show/hide admin-only elements
+      document.querySelectorAll('.admin-only').forEach(e =>
+        e.style.display = user.role==='admin' ? '' : 'none'
+      );
+
+      showScreen('app');
+      showTab('dashboard');
+    } else {
+      errEl.textContent = result.error || 'Login failed. Please try again.';
+      errEl.style.display = 'block';
+      btn.style.display = 'block';
+      spinner.style.display = 'none';
+    }
+  } catch(e) {
+    // Offline fallback — check localStorage cached credentials
+    const cached = JSON.parse(localStorage.getItem('gu_cached_users') || '[]');
+    const match  = cached.find(u => u.username===username && u.password===password && u.status==='active');
+    if (match) {
+      currentUser     = match.username;
+      currentRole     = match.role;
+      currentUserName = match.name;
+      currentDistrict = match.district;
+      currentUserRow  = match.row || 0;
+      document.getElementById('user-badge').textContent = (match.role==='admin'?'🛡 ':'🧑‍💼 ')+match.name;
+      document.getElementById('officer-name-display').textContent = match.name;
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = match.role==='admin'?'':'none');
+      showScreen('app'); showTab('dashboard');
+      showOfflineBanner('Logged in offline using cached credentials.');
+    } else {
+      errEl.textContent = 'Cannot reach server. Check internet connection. (' + e.message + ')';
+      errEl.style.display = 'block';
+      btn.style.display = 'block';
+      spinner.style.display = 'none';
+    }
+  }
 }
-function loginAdmin() {
-  currentUser='Admin'; currentRole='admin';
-  document.getElementById('user-badge').textContent='🛡 Admin';
-  document.getElementById('officer-name-display').textContent='Admin';
-  document.querySelectorAll('.admin-only').forEach(e=>e.style.display='');
-  showScreen('app'); showTab('dashboard');
+
+// Keep Enter key working
+document.addEventListener('DOMContentLoaded', () => {
+  const pw = document.getElementById('officer-pw');
+  if (pw) pw.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+});
+
+function showOfflineBanner(msg) {
+  const b = document.getElementById('pwa-offline-banner');
+  if (b) { b.textContent = '📡 ' + msg; b.style.display = 'block'; }
 }
+
+function loginOfficer() { doLogin(); } // legacy alias
+function loginAdmin()   { doLogin(); } // legacy alias
+
+function logout() {
+  currentUser=null; currentRole=null; currentUserName=null; currentDistrict=null;
+  document.getElementById('officer-id').value='';
+  document.getElementById('officer-pw').value='';
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('login-btn').style.display='block';
+  document.getElementById('login-spinner').style.display='none';
+  showScreen('login');
+}
+
 function trackCase() {
   const token = document.getElementById('track-token').value.toUpperCase().trim();
   showScreen('app'); showTab('track');
-  document.getElementById('track-input').value=token;
-  setTimeout(doTrack,200);
+  document.getElementById('track-input').value = token;
+  setTimeout(doTrack, 200);
 }
-function logout() { currentUser=null; currentRole=null; showScreen('login'); }
+
+// ══════════════════════════════════
+//  USER MANAGEMENT (admin only)
+// ══════════════════════════════════
+let editingUserRow = null;
+
+async function loadUsers() {
+  document.getElementById('users-loading').style.display = 'block';
+  document.getElementById('users-list').style.display = 'none';
+  try {
+    const result = await callSheets({ action: 'listUsers' });
+    if (result.ok) {
+      // Cache for offline login
+      localStorage.setItem('gu_cached_users', JSON.stringify(result.users));
+      renderUsersTable(result.users);
+    } else {
+      document.getElementById('users-loading').innerHTML =
+        `<div class="warn-box">Could not load users: ${result.error}</div>`;
+    }
+  } catch(e) {
+    document.getElementById('users-loading').innerHTML =
+      `<div class="warn-box">Offline — cannot load users right now.</div>`;
+  }
+}
+
+function renderUsersTable(users) {
+  document.getElementById('users-loading').style.display = 'none';
+  document.getElementById('users-list').style.display = 'block';
+  const tb = document.getElementById('users-tbody');
+  tb.innerHTML = users.map(u => `
+    <tr>
+      <td><span style="font-family:monospace;font-size:0.85rem;">${u.username}</span></td>
+      <td>${u.name}</td>
+      <td>${u.district}</td>
+      <td><span class="route-tag" style="font-size:0.72rem;">${u.role==='admin'?'🛡 Admin':'🧑‍💼 Officer'}</span></td>
+      <td>${u.status==='active'
+        ? '<span class="status-pill pill-submitted">Active</span>'
+        : '<span class="status-pill pill-pending">Inactive</span>'}</td>
+      <td><div class="action-btns">
+        <button class="btn-sm btn-sm-teal" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">Edit</button>
+        ${u.username!==currentUser
+          ? `<button class="btn-sm" style="background:rgba(192,57,43,0.15);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);"
+              onclick="toggleUserStatus('${u.username}',${u.row},'${u.status}')">
+              ${u.status==='active'?'Deactivate':'Activate'}</button>`
+          : '<span style="font-size:0.72rem;color:var(--muted);">(you)</span>'}
+      </div></td>
+    </tr>`).join('');
+}
+
+function openAddUser() {
+  editingUserRow = null;
+  document.getElementById('user-modal-title').textContent = 'Add New Field Officer';
+  document.getElementById('um-username').value = '';
+  document.getElementById('um-password').value = '';
+  document.getElementById('um-name').value = '';
+  document.getElementById('um-district').value = '';
+  document.getElementById('um-role').value = 'officer';
+  document.getElementById('um-status').value = 'active';
+  document.getElementById('um-row').value = '';
+  document.getElementById('um-status-wrap').style.display = 'none';
+  document.getElementById('um-username').disabled = false;
+  document.getElementById('um-error').style.display = 'none';
+  document.getElementById('um-save-btn').textContent = 'Add Officer';
+  document.getElementById('user-modal').classList.add('open');
+}
+
+function openEditUser(u) {
+  editingUserRow = u.row;
+  document.getElementById('user-modal-title').textContent = 'Edit Officer — ' + u.name;
+  document.getElementById('um-username').value = u.username;
+  document.getElementById('um-password').value = '';
+  document.getElementById('um-name').value = u.name;
+  document.getElementById('um-district').value = u.district;
+  document.getElementById('um-role').value = u.role;
+  document.getElementById('um-status').value = u.status;
+  document.getElementById('um-row').value = u.row;
+  document.getElementById('um-status-wrap').style.display = 'block';
+  document.getElementById('um-username').disabled = true;
+  document.getElementById('um-error').style.display = 'none';
+  document.getElementById('um-save-btn').textContent = 'Save Changes';
+  document.getElementById('user-modal').classList.add('open');
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal').classList.remove('open');
+}
+
+async function saveUser() {
+  const username = document.getElementById('um-username').value.trim();
+  const password = document.getElementById('um-password').value.trim();
+  const name     = document.getElementById('um-name').value.trim();
+  const district = document.getElementById('um-district').value;
+  const role     = document.getElementById('um-role').value;
+  const status   = document.getElementById('um-status').value;
+  const row      = document.getElementById('um-row').value;
+  const errEl    = document.getElementById('um-error');
+  const btn      = document.getElementById('um-save-btn');
+
+  if (!name || !district || !role) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.style.display = 'block'; return;
+  }
+  if (!editingUserRow && (!username || !password)) {
+    errEl.textContent = 'Username and password are required for new officers.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    let result;
+    if (!editingUserRow) {
+      // New user
+      result = await callSheets({ action:'addUser', username, password, name, district, role });
+    } else {
+      // Update existing
+      const payload = { action:'updateUser', row:parseInt(row), name, district, role, status };
+      if (password) payload.password = password;
+      result = await callSheets(payload);
+    }
+
+    if (result.ok) {
+      closeUserModal();
+      await loadUsers();
+    } else {
+      errEl.textContent = result.error || 'Could not save. Try again.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Network error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+
+  btn.textContent = editingUserRow ? 'Save Changes' : 'Add Officer';
+  btn.disabled = false;
+}
+
+async function toggleUserStatus(username, row, currentStatus) {
+  const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+  const action = newStatus === 'inactive' ? 'deactivate' : 'reactivate';
+  if (!confirm(`Are you sure you want to ${action} user "${username}"?`)) return;
+  try {
+    const result = await callSheets({ action:'updateUser', row, status: newStatus });
+    if (result.ok) {
+      await loadUsers();
+    } else {
+      alert('Error: ' + result.error);
+    }
+  } catch(e) {
+    alert('Network error: ' + e.message);
+  }
+}
 
 // ══════════════════════════════════
 //  DASHBOARD
