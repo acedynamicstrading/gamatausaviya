@@ -719,7 +719,14 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">// ── Mobile menu ──
+function toggleHamMenu() {
+  const d = document.getElementById('ham-drawer');
+  if (!d) return;
+  d.classList.toggle('open');
+  document.body.style.overflow = d.classList.contains('open') ? 'hidden' : '';
+}
+</script><script>
 // ── STATE ──
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz20nAEAeocp8zd99cyGRtq6Ax2KjnNj_YxxJyLRocmP2M0S9PmoobvY4Vn61PXZ9Wi7g/exec';
 const SHEETS_SECRET = 'gamatausaviya2025';
