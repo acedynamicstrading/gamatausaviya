@@ -1516,6 +1516,16 @@ function showTab(tab) {
 //  GOOGLE SHEETS AUTH
 // ══════════════════════════════════
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz20nAEAeocp8zd99cyGRtq6Ax2KjnNj_YxxJyLRocmP2M0S9PmoobvY4Vn61PXZ9Wi7g/exec';
+// ── Date formatter ──
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+  } catch(e) { return dateStr; }
+}
+
 const APP_SECRET = 'gamatausaviya2025';
 
 // ── Google Sheets API ──
@@ -2206,7 +2216,7 @@ async function submitCase(){
     files:uploadedFiles.map(f=>({name:f.name,size:f.size,type:f.type,dataUrl:f.dataUrl})),
     fileNames:uploadedFiles.map(f=>f.name),
     driveFiles:[],
-    created:new Date().toISOString().split('T')[0],
+    created:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),
     aiSummary:'',
     petition:'',
     folderUrl:'',
@@ -2310,7 +2320,7 @@ function renderTokenReceipt(c){
         ${c.folderUrl?`<div class="token-row"><span class="token-key">📁 Drive Folder</span><span class="token-val"><a href="${c.folderUrl}" target="_blank" style="color:var(--teal-bright);">View files in Google Drive →</a></span></div>`:''}
         <div class="token-row"><span class="token-key">Status</span><span class="token-val">${statusPill('Pending')}</span></div>
         <div class="token-row"><span class="token-key">Registered By</span><span class="token-val">${c.officer}</span></div>
-        <div class="token-row"><span class="token-key">Date</span><span class="token-val">${c.created}</span></div>
+        <div class="token-row"><span class="token-key">Date</span><span class="token-val">${formatDate(c.created)}</span></div>
       </div>
       <div class="dispatch-box" style="margin-top:16px;">
         <div class="dispatch-title">📤 Dispatch Summary</div>
@@ -2405,7 +2415,7 @@ async function generateAISummary(c) {
   };
   const prompt=`You are a Sri Lankan legal case summariser for the national legal aid programme Justice LK.
 Generate a CASE SUMMARY DOCUMENT. ${langInstr[c.lang]||langInstr.en}
-Token: ${c.token} | Date: ${c.created}
+Token: ${c.token} | Date: ${formatDate(c.created)}
 Client: ${c.client} | NIC: ${c.nic} | District: ${c.district}
 Case Type: ${caseTypeLabel(c.caseType)}${c.caseSubtype?' — '+c.caseSubtype:''}
 Respondent: ${c.opp}${c.oppAddr?' of '+c.oppAddr:''}
@@ -2575,7 +2585,7 @@ PRAYER
 VERIFICATION
 [Standard verification clause]
 
-Signed: _________________ Date: ${c.created}
+Signed: _________________ Date: ${formatDate(c.created)}
 Petitioner / Petitioner's Officer`;
 
   try {
@@ -2613,7 +2623,7 @@ function printPetition() {
       <div style="font-size:9pt;color:#666;margin-top:4px;">Filed via Justice LK National Legal Aid Programme</div>
     </div>
 
-    <div style="font-size:9pt;text-align:right;margin-bottom:12px;color:#666;">Date: ${c.created}</div>
+    <div style="font-size:9pt;text-align:right;margin-bottom:12px;color:#666;">Date: ${formatDate(c.created)}</div>
 
     <div style="white-space:pre-wrap;font-family:'Times New Roman',serif;font-size:11pt;line-height:1.9;">${text}</div>
 
@@ -2665,7 +2675,7 @@ function printClientCopy(){
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:9pt;color:#666;margin-bottom:4px;">CASE TOKEN / නඩු ටෝකන් අංකය</div>
       <div class="print-token">${c.token}</div>
-      <div style="font-size:9pt;color:#666;margin-top:4px;">Registered: ${c.created} | Language: ${langLabels[c.lang]||'English'}</div>
+      <div style="font-size:9pt;color:#666;margin-top:4px;">Registered: ${formatDate(c.created)} | Language: ${langLabels[c.lang]||'English'}</div>
     </div>
     <div class="print-section">
       <div class="print-section-title">Client / Petitioner Details</div>
