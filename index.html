@@ -852,6 +852,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
     <!-- TRACK TAB -->
     <div id="tab-track" style="display:none;">
       <div style="max-width:560px;margin:0 auto;">
+        <button onclick="goToDashboard()" style="background:none;border:none;color:var(--teal-bright);cursor:pointer;font-size:0.85rem;font-weight:600;padding:0;margin-bottom:16px;display:flex;align-items:center;gap:6px;">← Back to Dashboard</button>
         <h2 style="margin-bottom:6px;">Track a Case</h2>
         <p style="color:var(--muted);font-size:0.88rem;margin-bottom:24px;">Enter the token number issued to the client to view the current status and timeline.</p>
         <div class="track-box">
@@ -865,6 +866,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
     <!-- STATISTICS TAB (admin only) -->
     <div id="tab-stats" style="display:none;">
       <div style="margin-bottom:24px;">
+        <button onclick="goToDashboard()" style="background:none;border:none;color:var(--teal-bright);cursor:pointer;font-size:0.85rem;font-weight:600;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:6px;">← Back to Dashboard</button>
         <h2 style="font-size:1.5rem;">Platform Statistics</h2>
         <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Live overview of all cases registered on Justice LK.</p>
       </div>
@@ -922,6 +924,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
     <div id="tab-users" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
         <div>
+          <button onclick="goToDashboard()" style="background:none;border:none;color:var(--teal-bright);cursor:pointer;font-size:0.85rem;font-weight:600;padding:0;margin-bottom:8px;display:flex;align-items:center;gap:6px;">← Back to Dashboard</button>
           <h2 style="font-size:1.5rem;">User Management</h2>
           <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Only you can add, edit or remove field officers.</p>
         </div>
@@ -1825,10 +1828,34 @@ function renderUsersTable(users) {
         ${u.username!==currentUser
           ? `<button class="btn-sm" style="background:rgba(192,57,43,0.15);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);"
               onclick="toggleUserStatus('${u.username}',${u.row},'${u.status}')">
-              ${u.status==='active'?'Deactivate':'Activate'}</button>`
+              ${u.status==='active'?'Deactivate':'Activate'}</button>
+             <button class="btn-sm" style="background:rgba(192,57,43,0.25);color:#e74c3c;border:1px solid rgba(192,57,43,0.5);"
+              onclick="confirmDeleteUser('${u.username}',${u.row},'${u.name}')">🗑 Delete</button>`
           : '<span style="font-size:0.72rem;color:var(--muted);">(you)</span>'}
       </div></td>
     </tr>`).join('');
+}
+
+function confirmDeleteUser(username, row, name) {
+  if (!confirm('Delete officer "' + name + '" (' + username + ')? This cannot be undone.')) return;
+  deleteUser(username, row, name);
+}
+
+async function deleteUser(username, row, name) {
+  try {
+    showAlert('Deleting ' + name + '...', 'info');
+    const result = await callSheets({ action: 'deleteUser', username, row });
+    if (result && result.ok) {
+      showAlert(name + ' has been deleted.', 'success');
+      // Reload users list
+      const res = await callSheets({ action: 'listUsers' });
+      if (res && res.users) renderUsersTable(res.users);
+    } else {
+      showAlert('Could not delete user: ' + (result?.error || 'Unknown error'), 'error');
+    }
+  } catch(e) {
+    showAlert('Error deleting user: ' + e.message, 'error');
+  }
 }
 
 function openAddUser() {
