@@ -385,6 +385,8 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 .detail-item{background:rgba(255,255,255,0.03);border-radius:5px;padding:10px 12px;}
 .detail-item .dk{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;}
 .detail-item .dv{font-size:0.88rem;color:var(--cream);}
+.detail-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;}
+.detail-value{font-size:0.9rem;color:var(--cream);font-weight:500;}
 .status-update-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
 /* ══════════════════════════════════
@@ -644,11 +646,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 .dispatch-status{font-size:0.72rem;color:var(--green-bright);font-weight:600;}
 </style>
 
-<style>
-/* Offline bar spacing */
-body { padding-top: 32px !important; }
-</style>
-
 </head>
 <body>
 
@@ -656,6 +653,7 @@ body { padding-top: 32px !important; }
      SCREEN: LOGIN
 ══════════════════════════════════ -->
 <div id="screen-login" class="screen active">
+  <div id="pwa-offline-banner" style="display:none;background:rgba(18,184,168,0.12);border:1px solid var(--teal);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.82rem;color:var(--teal-bright);text-align:center;"></div>
   <div class="login-emblem">⚖</div>
   <div class="login-box">
     <h1 class="login-title">Justice LK</h1>
@@ -701,6 +699,7 @@ body { padding-top: 32px !important; }
         <input type="text" id="track-verify" placeholder="Your NIC or registered mobile">
       </div>
       <button class="btn-primary" onclick="trackCase()" style="width:100%;justify-content:center;">Track My Case →</button>
+      <div id="track-result-public" style="margin-top:16px;"></div>
     </div>
 
     <div class="info-box" style="margin-top:16px;font-size:0.78rem;">
@@ -811,6 +810,7 @@ body { padding-top: 32px !important; }
           </div>
         </div>
         <div style="overflow-x:auto;">
+          <div id="cases-loading-msg" style="display:none;padding:12px;font-size:0.85rem;color:var(--muted);text-align:center;"></div>
           <table class="case-table">
             <thead>
               <tr>
@@ -968,7 +968,7 @@ body { padding-top: 32px !important; }
           <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Review, approve, or reject lawyer registrations from the portal.</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <select id="la-filter-status" onchange="loadLawyerApps()" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--navy-mid);color:var(--text);font-size:0.85rem;">
+          <select id="la-filter-status" onchange="loadLawyerApps()" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--navy-mid);color:var(--cream);font-size:0.85rem;">
             <option value="">All Statuses</option>
             <option value="Pending Review">Pending Review</option>
             <option value="Approved">Approved</option>
@@ -1550,6 +1550,30 @@ let currentWStep = 1;
 let caseForm = {};
 let uploadedFiles = []; // stores {name, size, type, dataUrl}
 let cases = [];
+let selectedAfford = null;
+let selectedCourt  = null;
+let selectedLawyer = null;
+let selectedCaseType = null;
+
+// ══════════════════════════════════
+//  ALERTS / TOASTS
+// ══════════════════════════════════
+function showAlert(msg, type) {
+  let container = document.getElementById('offline-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'offline-toast-container';
+    container.style.cssText = 'position:fixed;bottom:24px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:340px;';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  const colours = { success:'#12b8a8', error:'#ef4444', info:'#6b9fd4', warning:'#f59e0b' };
+  toast.style.cssText = 'background:var(--navy-mid,#0d1f35);border:1px solid '+(colours[type]||colours.info)+';color:#fff;padding:10px 16px;border-radius:8px;font-size:0.85rem;font-family:\'Nunito\',sans-serif;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.4);';
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.transition='opacity 0.4s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(),400); }, 4000);
+}
+const showToast = showAlert;
 
 // ══════════════════════════════════
 //  NAVIGATION
@@ -1781,9 +1805,38 @@ async function loadCasesFromSheets() {
 
 function trackCase() {
   const token = document.getElementById('track-token').value.toUpperCase().trim();
-  showScreen('app'); showTab('track');
-  document.getElementById('track-input').value = token;
-  setTimeout(doTrack, 200);
+  if (currentUser) {
+    // Authenticated — use the in-app track tab
+    showScreen('app'); showTab('track');
+    document.getElementById('track-input').value = token;
+    setTimeout(doTrack, 200);
+  } else {
+    // Public — look up inline on login screen
+    const resultEl = document.getElementById('track-result-public');
+    if (!token) { resultEl.innerHTML = ''; return; }
+    const c = cases.find(x => x.token === token || x.id === token);
+    if (!c) {
+      resultEl.innerHTML = `<div class="warn-box"><strong>Token not found.</strong> Please check the token number and try again.</div>`;
+      return;
+    }
+    resultEl.innerHTML = `
+      <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div><div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Token</div><span class="token-badge">${c.token}</span></div>
+          <div>${statusPill(c.status)}</div>
+        </div>
+        <div class="detail-grid" style="margin-bottom:16px;">
+          <div class="detail-item"><div class="dk">Case Type</div><div class="dv">${caseTypeLabel(c.caseType)}</div></div>
+          <div class="detail-item"><div class="dk">Court</div><div class="dv">${c.court}</div></div>
+          <div class="detail-item"><div class="dk">Routed To</div><div class="dv">${c.route}</div></div>
+        </div>
+        <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--teal-bright);margin-bottom:12px;font-weight:600;">Case Timeline</div>
+        <div class="track-timeline">${renderTimeline(c)}</div>
+        <div class="info-box" style="margin-top:14px;">
+          <strong>Updates:</strong> Sent via ${c.contactPref||'WhatsApp'}. For urgent help: <strong>+94 77 362 2211</strong> (LexLK).
+        </div>
+      </div>`;
+  }
 }
 
 // ══════════════════════════════════
@@ -2225,7 +2278,7 @@ function buildCourtOptions(){
       'Labour Tribunal — Kandy'
     ],
     'Matale':[
-      'Matale District/Magistrates' Court',
+      "Matale District/Magistrates' Court",
       "Dambulla District/Magistrates' Court",
       "Naula Magistrates' Court"
     ],
@@ -2256,7 +2309,7 @@ function buildCourtOptions(){
       "Kotapola (Morawaka) District/Magistrates' Court"
     ],
     'Hambantota':[
-      'Hambantota District/Magistrates' Court',
+      "Hambantota District/Magistrates' Court",
       "Tangalle District/Magistrates' Court",
       "Walasmulla District/Magistrates' Court",
       "Tissamaharama District/Magistrates' Court",
@@ -2496,7 +2549,7 @@ async function submitCase(){
     client:clientName,
     nic:document.getElementById('c-nic')?.value||'',
     mobile:document.getElementById('c-mobile')?.value||'',
-    address:document.getElementById('c-address')?.value||'',
+    address:document.getElementById('c-addr')?.value||'',
     district:document.getElementById('c-district')?.value||'',
     caseType:selectedCaseType||'other',
     caseSubtype:document.getElementById('case-subtype')?.value||'',
@@ -3187,7 +3240,8 @@ function doTrack(){
 }
 
 // ── Init ──
-renderDashboard();
+// Only call renderDashboard if user is already authenticated (e.g. on hot reload)
+if (currentUser) renderDashboard();
 updateEngineLabel();
 // Restore saved keys on page load
 setTimeout(loadSavedKeys, 100);
@@ -3336,7 +3390,7 @@ function viewLawyerApp(ref) {
     ${app.profilePhotoUrl ? `<div style="margin-bottom:10px;"><div class="detail-label">Profile Photo</div><a href="${app.profilePhotoUrl}" target="_blank" style="color:var(--teal);font-size:0.85rem;">📎 View Photo</a></div>` : ''}
     <div style="margin-top:12px;">
       <div class="detail-label">Admin Notes</div>
-      <textarea id="la-notes" rows="3" placeholder="Add internal notes about this application…" style="width:100%;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;resize:vertical;">${app.notes||''}</textarea>
+      <textarea id="la-notes" rows="3" placeholder="Add internal notes about this application…" style="width:100%;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:0.88rem;resize:vertical;">${app.notes||''}</textarea>
     </div>`;
 
   document.getElementById('la-modal-footer').innerHTML = `
@@ -3396,6 +3450,14 @@ if ('serviceWorker' in navigator) {
           }
         });
       });
+
+      // Listen for sync completion messages from SW
+      navigator.serviceWorker.addEventListener('message', event => {
+        const msg = event.data;
+        if (msg?.type === 'SYNC_COMPLETE') {
+          handleSyncComplete(msg);
+        }
+      });
     } catch (err) {
       console.warn('[PWA] SW registration failed:', err);
     }
@@ -3442,18 +3504,16 @@ window.addEventListener('appinstalled', () => {
 const offlineBar = document.getElementById('offline-indicator');
 function updateOnlineStatus() {
   if (!navigator.onLine) {
-    offlineBar.classList.add('show');
-    offlineBar.textContent = '⚡ Offline — Switched to Ollama for AI. All case features work normally.';
-    // Auto switch to Ollama when offline
+    // Remember provider before going offline
     if (aiProvider === 'groq' || aiProvider === 'claude') {
+      localStorage.setItem('gu_provider_before_offline', aiProvider);
       aiProvider = 'ollama';
       localStorage.setItem('gu_provider', 'ollama');
       const lbl = document.getElementById('ai-engine-label');
       if (lbl) lbl.textContent = 'Ollama';
     }
   } else {
-    offlineBar.classList.remove('show');
-    // Auto switch back to Groq when online
+    // Auto switch back to saved provider when online
     const saved = localStorage.getItem('gu_provider_before_offline');
     if (saved && (aiProvider === 'ollama' || aiProvider === 'offline')) {
       aiProvider = saved;
@@ -3465,12 +3525,6 @@ function updateOnlineStatus() {
     }
   }
 }
-window.addEventListener('offline', function() {
-  // Remember what provider we were using before going offline
-  if (aiProvider === 'groq' || aiProvider === 'claude') {
-    localStorage.setItem('gu_provider_before_offline', aiProvider);
-  }
-});
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
@@ -3591,32 +3645,17 @@ async function initOfflineManager() {
     console.warn('[Offline] IndexedDB not available:', e);
   }
 
-  // Register service worker
-  if ('serviceWorker' in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      console.log('[Offline] Service Worker registered:', reg.scope);
-
-      // Listen for sync completion messages from SW
-      navigator.serviceWorker.addEventListener('message', event => {
-        const msg = event.data;
-        if (msg?.type === 'SYNC_COMPLETE') {
-          handleSyncComplete(msg);
+  // Wire offline sync message listener and update toast to the shared SW registration
+  if (swRegistration) {
+    // Prompt update if new SW waiting
+    swRegistration.addEventListener('updatefound', () => {
+      const newWorker = swRegistration.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          showOfflineToast('🔄 Update available — refresh to get the latest version.', 'info', 8000);
         }
       });
-
-      // Prompt update if new SW waiting
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showOfflineToast('🔄 Update available — refresh to get the latest version.', 'info', 8000);
-          }
-        });
-      });
-    } catch(e) {
-      console.warn('[Offline] Service Worker registration failed:', e);
-    }
+    });
   }
 
   // Watch online/offline events
@@ -3868,7 +3907,8 @@ function handleOnline() {
   console.log('[Offline] Connection restored');
   updateOnlineIndicator(true);
   showOfflineToast('📡 Connection restored!', 'success', 2000);
-  // Auto-sync after brief delay
+  // Restore AI provider and auto-sync
+  if (typeof updateOnlineStatus === 'function') updateOnlineStatus();
   setTimeout(() => triggerSync('auto'), 1500);
 }
 
@@ -4106,7 +4146,7 @@ async function submitCase() {
     client:       clientName,
     nic:          document.getElementById('c-nic')?.value          || '',
     mobile:       document.getElementById('c-mobile')?.value       || '',
-    address:      document.getElementById('c-address')?.value      || '',
+    address:      document.getElementById('c-addr')?.value      || '',
     district:     document.getElementById('c-district')?.value     || '',
     caseType:     typeof selectedCaseType !== 'undefined' ? selectedCaseType : 'other',
     caseSubtype:  document.getElementById('case-subtype')?.value   || '',
