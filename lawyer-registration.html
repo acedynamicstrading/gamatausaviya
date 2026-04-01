@@ -210,6 +210,31 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
 .uploaded-doc-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .uploaded-doc-remove{cursor:pointer;color:var(--red);font-size:0.75rem;flex-shrink:0;}
 
+/* native checkbox grid (specialisations) */
+.native-check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+@media(max-width:480px){.native-check-grid{grid-template-columns:1fr;}}
+.native-check-label{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border:1.5px solid var(--parchment-dark);
+  border-radius:4px;cursor:pointer;font-size:0.85rem;color:var(--ink);
+  background:#fff;transition:border-color 0.15s,background 0.15s;
+}
+.native-check-label:hover{border-color:var(--gold);background:var(--gold-glow);}
+.native-check-label input[type=checkbox]{
+  width:16px;height:16px;flex-shrink:0;accent-color:var(--gold);cursor:pointer;
+}
+/* native radio rows (fee / plan) */
+.native-radio-label{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border:1.5px solid var(--parchment-dark);
+  border-radius:4px;cursor:pointer;font-size:0.88rem;color:var(--ink);
+  background:#fff;transition:border-color 0.15s,background 0.15s;
+}
+.native-radio-label:hover{border-color:var(--gold);background:var(--gold-glow);}
+.native-radio-label input[type=radio]{
+  width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--gold);cursor:pointer;
+}
+
 /* consent */
 .consent-box{background:rgba(11,78,90,0.06);border:1px solid rgba(11,78,90,0.2);border-radius:6px;padding:14px;font-size:0.82rem;color:var(--muted);line-height:1.6;}
 .check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
@@ -542,46 +567,39 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
       <div class="form-section">
         <div class="form-section-label">Case Specialisations <span class="req">*</span></div>
         <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Select all case types you are willing to handle from the Justice LK network.</p>
-        <div class="spec-grid" id="spec-grid">
-          <label class="spec-check"><input type="checkbox" value="land"><div class="spec-dot"></div>🏡 Land & Property</label>
-          <label class="spec-check"><input type="checkbox" value="family"><div class="spec-dot"></div>👨‍👩‍👧 Family / Divorce</label>
-          <label class="spec-check"><input type="checkbox" value="debt"><div class="spec-dot"></div>💰 Debt / Money Recovery</label>
-          <label class="spec-check"><input type="checkbox" value="assault"><div class="spec-dot"></div>🚨 Assault / Threats</label>
-          <label class="spec-check"><input type="checkbox" value="labour"><div class="spec-dot"></div>⚒ Labour / Employment</label>
-          <label class="spec-check"><input type="checkbox" value="criminal"><div class="spec-dot"></div>⚖ Criminal Defence</label>
-          <label class="spec-check"><input type="checkbox" value="contract"><div class="spec-dot"></div>📝 Contract Disputes</label>
-          <label class="spec-check"><input type="checkbox" value="consumer"><div class="spec-dot"></div>🛒 Consumer Rights</label>
-          <label class="spec-check"><input type="checkbox" value="domestic"><div class="spec-dot"></div>🏠 Domestic Violence</label>
-          <label class="spec-check"><input type="checkbox" value="inheritance"><div class="spec-dot"></div>📜 Inheritance / Wills</label>
-          <label class="spec-check"><input type="checkbox" value="environment"><div class="spec-dot"></div>🌿 Environmental / Water</label>
-          <label class="spec-check"><input type="checkbox" value="other"><div class="spec-dot"></div>📂 General / Other</label>
+        <div class="native-check-grid" id="spec-grid">
+          <label class="native-check-label"><input type="checkbox" id="spec-land" value="land"> 🏡 Land &amp; Property</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-family" value="family"> 👨‍👩‍👧 Family / Divorce</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-debt" value="debt"> 💰 Debt / Money Recovery</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-assault" value="assault"> 🚨 Assault / Threats</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-labour" value="labour"> ⚒ Labour / Employment</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-criminal" value="criminal"> ⚖ Criminal Defence</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-contract" value="contract"> 📝 Contract Disputes</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-consumer" value="consumer"> 🛒 Consumer Rights</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-domestic" value="domestic"> 🏠 Domestic Violence</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-inheritance" value="inheritance"> 📜 Inheritance / Wills</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-environment" value="environment"> 🌿 Environmental / Water</label>
+          <label class="native-check-label"><input type="checkbox" id="spec-other" value="other"> 📂 General / Other</label>
         </div>
       </div>
 
       <!-- FEE RANGE -->
       <div class="form-section">
         <div class="form-section-label">Your Fee Range (shown to clients)</div>
-        <div class="fee-select-grid" id="fee-grid">
-          <div class="fee-option" onclick="selectFee('Rs.5,000–10,000', this)">
-            <span class="plan-name">Entry</span>
-            <span class="amount">Rs.5K–10K</span>
-            <span class="period">per case</span>
-            <span class="plan-desc">Suitable for straightforward matters — Magistrates' Court, Labour Tribunal</span>
-          </div>
-          <div class="fee-option selected" onclick="selectFee('Rs.10,000–20,000', this)">
-            <span class="plan-name">Standard</span>
-            <span class="amount">Rs.10K–20K</span>
-            <span class="period">per case</span>
-            <span class="plan-desc">Typical for District Court matters — land, family, debt, contract</span>
-          </div>
-          <div class="fee-option" onclick="selectFee('Rs.20,000+', this)">
-            <span class="plan-name">Senior</span>
-            <span class="amount">Rs.20K+</span>
-            <span class="period">per case</span>
-            <span class="plan-desc">Complex matters, High Court, PC/senior AAL rates</span>
-          </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label class="native-radio-label">
+            <input type="radio" name="f-fee-radio" value="Rs.5,000–10,000">
+            <div><strong>Entry — Rs.5,000–10,000</strong> <span style="font-size:0.78rem;color:var(--muted);">per case · Magistrates' Court, Labour Tribunal</span></div>
+          </label>
+          <label class="native-radio-label">
+            <input type="radio" name="f-fee-radio" value="Rs.10,000–20,000" checked>
+            <div><strong>Standard — Rs.10,000–20,000</strong> <span style="font-size:0.78rem;color:var(--muted);">per case · District Court, land, family, debt</span></div>
+          </label>
+          <label class="native-radio-label">
+            <input type="radio" name="f-fee-radio" value="Rs.20,000+">
+            <div><strong>Senior — Rs.20,000+</strong> <span style="font-size:0.78rem;color:var(--muted);">per case · High Court, PC/senior AAL rates</span></div>
+          </label>
         </div>
-        <input type="hidden" id="f-fee" value="Rs.10,000–20,000">
       </div>
 
       <!-- REGISTRATION PLAN -->
@@ -590,23 +608,16 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
         <div style="background:rgba(11,78,90,0.06);border:1px solid rgba(11,78,90,0.2);border-radius:6px;padding:16px;font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:14px;">
           <strong style="color:var(--ink);">No payment required to apply.</strong> Registration fee is collected after your credentials are verified and your profile is approved by the LexLK team.
         </div>
-        <div class="form-grid">
-          <div class="fee-option" id="plan-annual" onclick="selectPlan('annual',this)" style="text-align:left;display:flex;gap:12px;align-items:center;">
-            <div>
-              <span class="plan-name" style="font-size:0.9rem;">Annual</span>
-              <span class="amount" style="font-size:1.4rem;">Rs.6,000</span>
-              <span class="period">per year</span>
-            </div>
-          </div>
-          <div class="fee-option selected" id="plan-biannual" onclick="selectPlan('biannual',this)" style="text-align:left;display:flex;gap:12px;align-items:center;">
-            <div>
-              <span class="plan-name" style="font-size:0.9rem;">2 Years <span style="background:var(--gold);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:8px;margin-left:6px;">SAVE Rs.2,000</span></span>
-              <span class="amount" style="font-size:1.4rem;">Rs.10,000</span>
-              <span class="period">for 2 years</span>
-            </div>
-          </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label class="native-radio-label">
+            <input type="radio" name="f-plan-radio" value="annual">
+            <div><strong>Annual — Rs.6,000</strong> <span style="font-size:0.78rem;color:var(--muted);">per year</span></div>
+          </label>
+          <label class="native-radio-label">
+            <input type="radio" name="f-plan-radio" value="biannual" checked>
+            <div><strong>2 Years — Rs.10,000</strong> <span style="font-size:0.78rem;color:var(--muted);">saves Rs.2,000</span> <span style="background:var(--gold);color:#fff;font-size:0.65rem;padding:1px 6px;border-radius:6px;margin-left:4px;">BEST VALUE</span></div>
+          </label>
         </div>
-        <input type="hidden" id="f-plan" value="biannual">
       </div>
 
       <!-- DOCUMENTS -->
@@ -824,7 +835,7 @@ function submitRegistration() {
   }
   if (!/\S+@\S+\.\S+/.test(email)) { showAlert('Please enter a valid email address.'); return; }
 
-  const specs = [...document.querySelectorAll('#spec-grid .spec-check.checked')];
+  const specs = [...document.querySelectorAll('#spec-grid input[type=checkbox]:checked')];
   if (specs.length === 0) { showAlert('Please select at least one case specialisation.'); return; }
 
   const langs = ['si','ta','en'].filter(l => document.getElementById('lang-'+l)?.checked);
@@ -844,10 +855,10 @@ function submitRegistration() {
     ref: refNum,
     name, nic, mobile, email, address, district,
     regType, barNum, year,
-    specialisations: specs.map(s => s.querySelector('input').value),
+    specialisations: specs.map(s => s.value),
     languages: langs,
-    fee: selectedFeeValue,
-    plan: selectedPlanValue,
+    fee: (document.querySelector('input[name="f-fee-radio"]:checked')?.value || 'Rs.10,000–20,000'),
+    plan: (document.querySelector('input[name="f-plan-radio"]:checked')?.value || 'biannual'),
     bio: document.getElementById('f-bio').value.trim(),
     courts: [...document.getElementById('f-courts').selectedOptions].map(o=>o.value),
     docsUploaded: Object.keys(docs).filter(k=>docs[k]!==null),
@@ -967,10 +978,12 @@ function resetForm() {
   });
   ['f-district','f-reg-type'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   ['c1','c2','c3','c4','lang-si','lang-ta','lang-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
-  document.querySelectorAll('#spec-grid .spec-check').forEach(el=>{el.classList.remove('checked');el.querySelector('input').checked=false;el.querySelector('.spec-dot').textContent='';});
+  document.querySelectorAll('#spec-grid input[type=checkbox]').forEach(cb=>cb.checked=false);
+  const defFee=document.querySelector('input[name="f-fee-radio"][value="Rs.10,000–20,000"]');
+  if(defFee) defFee.checked=true;
+  const defPlan=document.querySelector('input[name="f-plan-radio"][value="biannual"]');
+  if(defPlan) defPlan.checked=true;
   Object.keys(docs).forEach(k=>{docs[k]=null;renderDocList(k);});
-  selectFee('Rs.10,000–20,000', document.querySelector('#fee-grid .fee-option:nth-child(2)'));
-  selectPlan('biannual', document.getElementById('plan-biannual'));
 }
 
 // ── SMOOTH SCROLL ──
