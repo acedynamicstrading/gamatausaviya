@@ -433,7 +433,7 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
       <div class="success-ref" id="success-ref-num">APP-2025-000001</div>
       <p class="success-desc">Your application has been received. Once approved, you will have access to <strong>both the LexLK Professional Platform and the Justice LK Case Management System</strong>. Our team will review your credentials and contact you within <strong>2 business days</strong>. Keep your application reference number safe.</p>
       <div class="next-steps-list">
-        <div class="ns-item"><div class="ns-num">1</div><div class="ns-text">Watch for an email from <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4821262e2708242d302423662b2725">[email&#160;protected]</a></strong> or a call from <strong>+94 77 362 2211</strong> confirming your registration.</div></div>
+        <div class="ns-item"><div class="ns-num">1</div><div class="ns-text">Watch for an email from <strong>justicelkcontact@gmail.com</strong> or a call from <strong>+94 77 362 2211</strong> confirming your registration.</div></div>
         <div class="ns-item"><div class="ns-num">2</div><div class="ns-text">Prepare your original Bar Association certificate and NIC — you may be asked to verify these in person or by photo.</div></div>
         <div class="ns-item"><div class="ns-num">3</div><div class="ns-text">Once approved, your profile goes live on <strong>both LexLK and Justice LK</strong>. Clients on LexLK can find and book you directly. Cases from Justice LK matching your district and specialisation will be sent to you automatically.</div></div>
         <div class="ns-item"><div class="ns-num">4</div><div class="ns-text">Registration fee payment instructions will be shared after profile approval. No upfront payment required to apply.</div></div>
@@ -508,7 +508,7 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
           </div>
           <div class="field">
             <label>Year Admitted to the Bar <span class="req">*</span></label>
-            <input type="number" id="f-year" placeholder="e.g. 2008" min="1950" max="2100">
+            <input type="number" id="f-year" placeholder="e.g. 2008" min="1950" max="2025">
           </div>
         </div>
         <div class="form-grid" style="margin-top:14px;">
@@ -724,17 +724,14 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-<script>
-// ── Mobile menu ──
+<script>// ── Mobile menu ──
 function toggleHamMenu() {
   const d = document.getElementById('ham-drawer');
   if (!d) return;
   d.classList.toggle('open');
   document.body.style.overflow = d.classList.contains('open') ? 'hidden' : '';
 }
-</script>
-<script>
+</script><script>
 // ── STATE ──
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz20nAEAeocp8zd99cyGRtq6Ax2KjnNj_YxxJyLRocmP2M0S9PmoobvY4Vn61PXZ9Wi7g/exec';
 const SHEETS_SECRET = 'gamatausaviya2025';
@@ -810,7 +807,6 @@ function submitRegistration() {
   const regType = document.getElementById('f-reg-type').value;
   const barNum = document.getElementById('f-bar-num').value.trim();
   const year = document.getElementById('f-year').value.trim();
-  const selectedCourts = [...document.getElementById('f-courts').selectedOptions].map(o => o.value);
 
   if (!name||!nic||!mobile||!email||!address||!district||!regType||!barNum||!year) {
     showAlert('Please fill in all required fields (marked with *).'); return;
@@ -822,7 +818,6 @@ function submitRegistration() {
 
   const langs = ['si','ta','en'].filter(l => document.getElementById('lang-'+l)?.checked);
   if (langs.length === 0) { showAlert('Please select at least one language of practice.'); return; }
-  if (selectedCourts.length === 0) { showAlert('Please select at least one court of practice.'); return; }
 
   if (!docs.bar) { showAlert('Please upload your Bar Association certificate.'); return; }
   if (!docs.nic) { showAlert('Please upload a photo of your NIC.'); return; }
@@ -901,13 +896,7 @@ function submitRegistration() {
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
-      const raw = await res.text();
-      let json;
-      try {
-        json = JSON.parse(raw);
-      } catch (parseErr) {
-        throw new Error('Invalid server response');
-      }
+      const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Submission failed');
 
       // Show success
@@ -940,13 +929,7 @@ async function uploadDoc(docData, filename) {
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(payload)
   });
-  const raw = await res.text();
-  let json;
-  try {
-    json = JSON.parse(raw);
-  } catch (parseErr) {
-    throw new Error('Invalid upload response');
-  }
+  const json = await res.json();
   if (!json.success) throw new Error('Upload failed: ' + filename);
   return json.url || '';
 }
@@ -955,17 +938,12 @@ function resetForm() {
   document.getElementById('form-state').style.display = 'block';
   document.getElementById('success-screen').style.display = 'none';
   document.getElementById('submit-btn').disabled = false;
-  document.getElementById('submit-btn').innerHTML = '<span>⚖</span> Submit Legal Professional Registration';
   document.getElementById('form-alert').innerHTML = '';
   // Reset all inputs
   ['f-name','f-nic','f-mobile','f-email','f-address','f-bar-num','f-year','f-bio'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
   ['f-district','f-reg-type'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
-  const courtsEl = document.getElementById('f-courts');
-  if (courtsEl) {
-    [...courtsEl.options].forEach(opt => { opt.selected = false; });
-  }
   ['c1','c2','c3','c4','lang-si','lang-ta','lang-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
   document.querySelectorAll('#spec-grid .spec-check').forEach(el=>{el.classList.remove('checked');el.querySelector('input').checked=false;el.querySelector('.spec-dot').textContent='';});
   Object.keys(docs).forEach(k=>{docs[k]=null;renderDocList(k);});
