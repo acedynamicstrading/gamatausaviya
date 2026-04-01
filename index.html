@@ -664,8 +664,8 @@ body { padding-top: 32px !important; }
       <span class="login-si">ක්ෂේත්‍ර නිලධාරී පද්ධතිය · அலுவலக அமைப்பு</span>
     </div>
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchLoginTab('officer')">🧑‍💼 Sign In</button>
-      <button class="login-tab" onclick="switchLoginTab('track')">🔍 Track Case</button>
+      <button class="login-tab active" onclick="switchLoginTab('officer',this)">🧑‍💼 Sign In</button>
+      <button class="login-tab" onclick="switchLoginTab('track',this)">🔍 Track Case</button>
     </div>
 
     <!-- SIGN IN -->
@@ -1649,9 +1649,9 @@ async function callSheetsWithFeedback(payload, loadingMsg) {
   }
 }
 
-function switchLoginTab(t) {
+function switchLoginTab(t, btn) {
   document.querySelectorAll('.login-tab').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  btn.classList.add('active');
   document.getElementById('login-officer').style.display = t==='officer'?'block':'none';
   document.getElementById('login-track').style.display   = t==='track'?'block':'none';
 }
