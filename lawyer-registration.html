@@ -540,16 +540,17 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
         <div class="form-grid" style="margin-top:14px;">
           <div class="field">
             <label>Courts of Practice <span class="req">*</span></label>
-            <div class="native-check-grid" id="courts-grid" style="margin-top:4px;">
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="District Court"> 🏛 District Court</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Magistrates' Court"> ⚖ Magistrates' Court</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="High Court"> 🏦 High Court</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Court of Appeal"> 📋 Court of Appeal</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Supreme Court"> 👑 Supreme Court</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Labour Tribunal"> 🔨 Labour Tribunal</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Family Court"> 👨‍👩‍👧 Family Court</label>
-              <label class="native-check-label"><input type="checkbox" class="court-cb" value="Commercial High Court"> 💼 Commercial High Court</label>
-            </div>
+            <select id="f-courts" multiple style="min-height:90px;">
+              <option>District Court</option>
+              <option>Magistrates' Court</option>
+              <option>High Court</option>
+              <option>Court of Appeal</option>
+              <option>Supreme Court</option>
+              <option>Labour Tribunal</option>
+              <option>Family Court</option>
+              <option>Commercial High Court</option>
+            </select>
+            <span class="hint">Hold Ctrl / Cmd to select multiple courts</span>
           </div>
           <div class="field">
             <label>Languages of Practice <span class="req">*</span></label>
@@ -744,8 +745,7 @@ function toggleHamMenu() {
 }
 </script><script>
 // ── STATE ──
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz20nAEAeocp8zd99cyGRtq6Ax2KjnNj_YxxJyLRocmP2M0S9PmoobvY4Vn61PXZ9Wi7g/exec';
-const SHEETS_SECRET = 'gamatausaviya2025';
+const WORKER_URL = 'https://lexlk.acedynamicstrading.workers.dev';
 const docs = { bar: null, nic: null, photo: null };
 let selectedFeeValue = 'Rs.10,000–20,000';
 let selectedPlanValue = 'biannual';
@@ -826,7 +826,7 @@ async function submitRegistration() {
     fee: (document.querySelector('input[name="f-fee-radio"]:checked')?.value || 'Rs.10,000–20,000'),
     plan: (document.querySelector('input[name="f-plan-radio"]:checked')?.value || 'biannual'),
     bio: document.getElementById('f-bio').value.trim(),
-    courts: [...document.querySelectorAll('#courts-grid .court-cb:checked')].map(o=>o.value),
+    courts: [...document.getElementById('f-courts').selectedOptions].map(o=>o.value),
     docsUploaded: Object.keys(docs).filter(k=>docs[k]!==null),
     submittedAt: new Date().toISOString(),
     status: 'Pending Review'
@@ -851,13 +851,12 @@ async function submitRegistration() {
         profilePhotoUrl = await uploadDoc(docs.photo, refNum + '_profile', refNum, registration.name);
       }
 
-      // Save application — Apps Script doPost reads JSON.parse(e.postData.contents)
-      const res = await fetch(SHEETS_URL, {
+      // Save application via Cloudflare Worker
+      const res = await fetch(WORKER_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'saveLawyerApp',
-          secret: SHEETS_SECRET,
           ref: registration.ref,
           name: registration.name,
           nic: registration.nic,
@@ -900,12 +899,11 @@ async function submitRegistration() {
 }
 
 async function uploadDoc(docData, filename, ref, name) {
-  const res = await fetch(SHEETS_URL, {
+  const res = await fetch(WORKER_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       action: 'uploadLawyerDoc',
-      secret: SHEETS_SECRET,
       filename: filename,
       mimeType: docData.dataUrl.split(';')[0].replace('data:', ''),
       base64data: docData.dataUrl.split(',')[1],
@@ -930,6 +928,5 @@ function resetForm() {
   ['f-district','f-reg-type'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
   ['c1','c2','c3','c4','lang-si','lang-ta','lang-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
   document.querySelectorAll('#spec-grid input[type=checkbox]').forEach(cb=>cb.checked=false);
-  document.querySelectorAll('#courts-grid .court-cb').forEach(cb=>cb.checked=false);
   const defFee=document.querySelector('input[name="f-fee-radio"][value="Rs.10,000–20,000"]');
   if(de
