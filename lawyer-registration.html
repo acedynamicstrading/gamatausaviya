@@ -843,13 +843,13 @@ async function submitRegistration() {
       // Upload bar certificate
       let barCertUrl = '', nicPhotoUrl = '', profilePhotoUrl = '';
       if (docs.bar) {
-        barCertUrl = await uploadDoc(docs.bar, refNum + '_bar_cert');
+        barCertUrl = await uploadDoc(docs.bar, refNum + '_bar_cert', refNum, registration.name);
       }
       if (docs.nic) {
-        nicPhotoUrl = await uploadDoc(docs.nic, refNum + '_nic');
+        nicPhotoUrl = await uploadDoc(docs.nic, refNum + '_nic', refNum, registration.name);
       }
       if (docs.photo) {
-        profilePhotoUrl = await uploadDoc(docs.photo, refNum + '_profile');
+        profilePhotoUrl = await uploadDoc(docs.photo, refNum + '_profile', refNum, registration.name);
       }
 
       // Save application — Apps Script doPost reads JSON.parse(e.postData.contents)
@@ -900,9 +900,7 @@ async function submitRegistration() {
   await doSubmit();
 }
 
-async function uploadDoc(docData, filename) {
-  // Send base64 doc to Apps Script for Drive upload
-  // Apps Script saves to Drive and returns the file URL
+async function uploadDoc(docData, filename, ref, name) {
   const res = await fetch(SHEETS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
@@ -911,12 +909,14 @@ async function uploadDoc(docData, filename) {
       secret: SHEETS_SECRET,
       filename: filename,
       mimeType: docData.dataUrl.split(';')[0].replace('data:', ''),
-      base64data: docData.dataUrl.split(',')[1]
+      base64data: docData.dataUrl.split(',')[1],
+      ref: ref || '',
+      name: name || ''
     })
   });
   const json = await res.json();
   if (!json.ok) throw new Error('Upload failed: ' + filename);
-  return json.url || '';
+  return json.viewUrl || json.url || '';
 }
 
 function resetForm() {

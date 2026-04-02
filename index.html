@@ -3284,7 +3284,7 @@ async function loadLawyerApps() {
 
   try {
     const res  = await callSheets({ action: 'listLawyerApps', secret: APP_SECRET });
-    const apps = res.data || [];
+    const apps = res.applications || res.data || [];
     lawyerAppsCache = apps;
 
     const filter = document.getElementById('la-filter-status')?.value || '';
