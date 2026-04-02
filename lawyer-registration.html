@@ -771,10 +771,10 @@ function selectPlan(val, el) {
 function handleDoc(input, type) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { console.warn('File too large. Maximum 5MB.'); return; }
+  if (file.size > 5 * 1024 * 1024) { showAlert(file.name + ' is too large. Maximum 5MB per file.'); input.value = ''; return; }
   const reader = new FileReader();
   reader.onload = e => {
-    docs[type] = { name: file.name, size: file.size, dataUrl: e.target.result };
+    docs[type] = { name: file.name, size: file.size, type: file.type || 'application/octet-stream', dataUrl: e.target.result };
     renderDocList(type);
   };
   reader.readAsDataURL(file);
@@ -868,32 +868,30 @@ function submitRegistration() {
         profilePhotoUrl = await uploadDoc(docs.photo, refNum + '_profile');
       }
 
-      // Save application to Google Sheet
+      // Save application to Google Sheet — flat payload, matches Apps Script doPost reader
       const payload = {
-        action: 'saveLawyerApp',
-        secret: SHEETS_SECRET,
-        data: {
-          ref: registration.ref,
-          name: registration.name,
-          nic: registration.nic,
-          mobile: registration.mobile,
-          email: registration.email,
-          district: registration.district,
-          regType: registration.regType,
-          barNum: registration.barNum,
-          year: registration.year,
-          specialisations: registration.specialisations.join(', '),
-          fee: registration.fee,
-          plan: registration.plan,
-          bio: registration.bio,
-          courts: registration.courts.join(', '),
-          languages: registration.languages.join(', '),
-          status: 'Pending Review',
-          submittedAt: registration.submittedAt,
-          barCertUrl,
-          nicPhotoUrl,
-          profilePhotoUrl
-        }
+        action:           'saveLawyerApp',
+        secret:           SHEETS_SECRET,
+        ref:              registration.ref,
+        name:             registration.name,
+        nic:              registration.nic,
+        mobile:           registration.mobile,
+        email:            registration.email,
+        district:         registration.district,
+        regType:          registration.regType,
+        barNum:           registration.barNum,
+        year:             registration.year,
+        specialisations:  registration.specialisations.join(', '),
+        fee:              registration.fee,
+        plan:             registration.plan,
+        bio:              registration.bio,
+        courts:           registration.courts.join(', '),
+        languages:        registration.languages.join(', '),
+        status:           'Pending Review',
+        submittedAt:      registration.submittedAt,
+        barCertUrl,
+        nicPhotoUrl,
+        profilePhotoUrl
       };
 
       const res = await fetch(SHEETS_URL, {
@@ -908,7 +906,7 @@ function submitRegistration() {
       } catch (parseErr) {
         throw new Error('Invalid server response');
       }
-      if (!json.success) throw new Error(json.error || 'Submission failed');
+      if (!json.ok) throw new Error(json.error || 'Submission failed');
 
       // Show success
       document.getElementById('success-ref-num').textContent = refNum;
@@ -927,13 +925,17 @@ function submitRegistration() {
 }
 
 async function uploadDoc(docData, filename) {
-  // docData is base64 string like "data:image/jpeg;base64,..."
+  // docData is the object stored by handleDoc: { name, size, type, dataUrl }
+  // Uses the exact same pattern as the case system in index.html
+  const base64 = docData.dataUrl ? docData.dataUrl.split(',')[1] : null;
+  if (!base64) throw new Error('Could not read file: ' + docData.name);
   const payload = {
-    action: 'uploadLawyerDoc',
-    secret: SHEETS_SECRET,
-    filename: filename,
-    mimeType: docData.split(';')[0].replace('data:', ''),
-    data: docData.split(',')[1]
+    action:     'uploadFile',
+    token:      filename,
+    clientName: 'LawyerReg',
+    filename:   docData.name,
+    mimeType:   docData.type || 'application/octet-stream',
+    base64data: base64
   };
   const res = await fetch(SHEETS_URL, {
     method: 'POST',
@@ -945,10 +947,10 @@ async function uploadDoc(docData, filename) {
   try {
     json = JSON.parse(raw);
   } catch (parseErr) {
-    throw new Error('Invalid upload response');
+    throw new Error('Invalid upload response for: ' + docData.name);
   }
-  if (!json.success) throw new Error('Upload failed: ' + filename);
-  return json.url || '';
+  if (!json.ok) throw new Error('Upload failed: ' + docData.name);
+  return json.viewUrl || json.url || '';
 }
 
 function resetForm() {
