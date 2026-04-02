@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Justice LK · යුක්තිය LK · நீதி LK — Case Management System</title>
-<meta name="copyright" content="© 2026 Elmo Richard Pereira. All rights reserved. Protected under the Intellectual Property Act No. 36 of 2003 of Sri Lanka.">
-<meta name="author" content="Elmo Richard Pereira">
-<meta name="rights" content="Protected under the Intellectual Property Act No. 36 of 2003 of Sri Lanka. Ace Dynamics Trading operates under license from the copyright owner.">
 <meta name="description" content="National Legal Aid Case Management — Sri Lanka. Helping villagers access justice.">
 <meta name="theme-color" content="#0B6E7A">
 <meta name="mobile-web-app-capable" content="yes">
@@ -14,7 +11,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Justice LK">
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@300;400;600;700&family=Noto+Sans+Tamil:wght@400;600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -385,8 +381,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 .detail-item{background:rgba(255,255,255,0.03);border-radius:5px;padding:10px 12px;}
 .detail-item .dk{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;}
 .detail-item .dv{font-size:0.88rem;color:var(--cream);}
-.detail-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;}
-.detail-value{font-size:0.9rem;color:var(--cream);font-weight:500;}
 .status-update-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
 /* ══════════════════════════════════
@@ -645,7 +639,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 .dispatch-detail{font-size:0.76rem;color:var(--muted);}
 .dispatch-status{font-size:0.72rem;color:var(--green-bright);font-weight:600;}
 </style>
-
 </head>
 <body>
 
@@ -653,7 +646,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
      SCREEN: LOGIN
 ══════════════════════════════════ -->
 <div id="screen-login" class="screen active">
-  <div id="pwa-offline-banner" style="display:none;background:rgba(18,184,168,0.12);border:1px solid var(--teal);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.82rem;color:var(--teal-bright);text-align:center;"></div>
   <div class="login-emblem">⚖</div>
   <div class="login-box">
     <h1 class="login-title">Justice LK</h1>
@@ -662,8 +654,8 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <span class="login-si">ක්ෂේත්‍ර නිලධාරී පද්ධතිය · அலுவலக அமைப்பு</span>
     </div>
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchLoginTab('officer',this)">🧑‍💼 Sign In</button>
-      <button class="login-tab" onclick="switchLoginTab('track',this)">🔍 Track Case</button>
+      <button class="login-tab active" onclick="switchLoginTab('officer')">🧑‍💼 Sign In</button>
+      <button class="login-tab" onclick="switchLoginTab('track')">🔍 Track Case</button>
     </div>
 
     <!-- SIGN IN -->
@@ -699,7 +691,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
         <input type="text" id="track-verify" placeholder="Your NIC or registered mobile">
       </div>
       <button class="btn-primary" onclick="trackCase()" style="width:100%;justify-content:center;">Track My Case →</button>
-      <div id="track-result-public" style="margin-top:16px;"></div>
     </div>
 
     <div class="info-box" style="margin-top:16px;font-size:0.78rem;">
@@ -713,7 +704,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       </a>
     </div>
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);text-align:center;font-size:0.65rem;color:var(--muted);line-height:1.7;">
-      © 2026 Elmo Richard Pereira. All rights reserved. — Sri Lanka<br>
+      © 2026 Ace Dynamics Trading — Sri Lanka<br>
       Justice LK · National Digital Justice Access Programme<br>
       Unauthorised reproduction or redistribution is strictly prohibited.
       &nbsp;·&nbsp; <a href="https://acedynamicstrading.github.io/justicelk/privacy-policy.html" target="_blank" style="color:var(--muted);text-decoration:underline;font-size:0.62rem;">Privacy Policy</a>
@@ -723,11 +714,14 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
   <div style="margin-top:20px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.07);text-align:center;">
     <div style="font-size:0.58rem;color:rgba(255,255,255,0.2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Supported By</div>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;">
-      <div style="width:56px;height:28px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.52rem;color:rgba(255,255,255,0.2);">Logo</div>
-      <div style="width:56px;height:28px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.52rem;color:rgba(255,255,255,0.2);">Logo</div>
-      <div style="width:56px;height:28px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.52rem;color:rgba(255,255,255,0.2);">Logo</div>
-      <div style="width:56px;height:28px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.52rem;color:rgba(255,255,255,0.2);">Logo</div>
-      <div style="width:56px;height:28px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.52rem;color:rgba(255,255,255,0.2);">Logo</div>
+      <a href="https://acedynamicstrading.github.io/justicekids/" target="_blank" rel="noopener"
+         style="min-width:110px;height:34px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.16);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:0.64rem;font-weight:700;letter-spacing:0.03em;color:#F5D77B;text-decoration:none;padding:0 12px;">
+        JusticeKids
+      </a>
+      <a href="https://acedynamicstrading.github.io/JusticeSL/" target="_blank" rel="noopener"
+         style="min-width:110px;height:34px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.16);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:0.64rem;font-weight:700;letter-spacing:0.03em;color:#9BE7F1;text-decoration:none;padding:0 12px;">
+        JusticeSL
+      </a>
     </div>
   </div>
   </div>
@@ -774,7 +768,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
     <div id="tab-dashboard">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
         <div>
-          <h2 style="font-size:1.5rem;"><span id="greeting-time">Good morning</span>, <span id="officer-name-display">Officer</span></h2>
+          <h2 style="font-size:1.5rem;">Good morning, <span id="officer-name-display">Officer</span></h2>
           <p style="color:var(--muted);font-size:0.88rem;margin-top:3px;">Here's your case overview for today.</p>
         </div>
         <button class="btn-gold" onclick="showTab('newcase')">+ Register New Case</button>
@@ -810,7 +804,6 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
           </div>
         </div>
         <div style="overflow-x:auto;">
-          <div id="cases-loading-msg" style="display:none;padding:12px;font-size:0.85rem;color:var(--muted);text-align:center;"></div>
           <table class="case-table">
             <thead>
               <tr>
@@ -882,11 +875,11 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <!-- STAT CARDS -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;">
         <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;text-align:center;">
-          <div style="font-size:2rem;font-weight:900;color:var(--gold);" id="stat-total">—</div>
+          <div style="font-size:2rem;font-weight:900;color:var(--gold);" id="stats-total">—</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Total Cases</div>
         </div>
         <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;text-align:center;">
-          <div style="font-size:2rem;font-weight:900;color:var(--teal-bright);" id="stat-pending">—</div>
+          <div style="font-size:2rem;font-weight:900;color:var(--teal-bright);" id="stats-pending">—</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Pending</div>
         </div>
         <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;text-align:center;">
@@ -894,7 +887,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
           <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Assigned</div>
         </div>
         <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;text-align:center;">
-          <div style="font-size:2rem;font-weight:900;color:#10B981;" id="stat-closed">—</div>
+          <div style="font-size:2rem;font-weight:900;color:#10B981;" id="stats-closed">—</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Closed</div>
         </div>
         <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;text-align:center;">
@@ -968,7 +961,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
           <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Review, approve, or reject lawyer registrations from the portal.</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <select id="la-filter-status" onchange="loadLawyerApps()" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--navy-mid);color:var(--cream);font-size:0.85rem;">
+          <select id="la-filter-status" onchange="loadLawyerApps()" style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--navy-mid);color:var(--text);font-size:0.85rem;">
             <option value="">All Statuses</option>
             <option value="Pending Review">Pending Review</option>
             <option value="Approved">Approved</option>
@@ -1305,7 +1298,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
         <div class="wizard-nav">
           <button class="btn-secondary" onclick="goWStep(3)">← Back</button>
           <span class="step-counter">Step 4 of 7</span>
-          <button class="btn-gold" onclick="validateStep4W()">Continue →</button>
+          <button class="btn-gold" onclick="goWStep(5)">Continue →</button>
         </div>
       </div>
 
@@ -1550,30 +1543,6 @@ let currentWStep = 1;
 let caseForm = {};
 let uploadedFiles = []; // stores {name, size, type, dataUrl}
 let cases = [];
-let selectedAfford = null;
-let selectedCourt  = null;
-let selectedLawyer = null;
-let selectedCaseType = null;
-
-// ══════════════════════════════════
-//  ALERTS / TOASTS
-// ══════════════════════════════════
-function showAlert(msg, type) {
-  let container = document.getElementById('offline-toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'offline-toast-container';
-    container.style.cssText = 'position:fixed;bottom:24px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:340px;';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  const colours = { success:'#12b8a8', error:'#ef4444', info:'#6b9fd4', warning:'#f59e0b' };
-  toast.style.cssText = 'background:var(--navy-mid,#0d1f35);border:1px solid '+(colours[type]||colours.info)+';color:#fff;padding:10px 16px;border-radius:8px;font-size:0.85rem;font-family:\'Nunito\',sans-serif;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.4);';
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => { toast.style.transition='opacity 0.4s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(),400); }, 4000);
-}
-const showToast = showAlert;
 
 // ══════════════════════════════════
 //  NAVIGATION
@@ -1620,12 +1589,20 @@ function callSheets(payload) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Timeout')), 20000);
 
-    // Apps Script doPost reads JSON.parse(e.postData.contents)
-    // text/plain avoids CORS preflight
+    // Build URL params for GET
+    const params = new URLSearchParams();
+    Object.entries({ ...payload, secret: APP_SECRET }).forEach(([k, v]) => {
+      if (v !== null && v !== undefined) {
+        if (typeof v === 'object') params.append(k, JSON.stringify(v));
+        else params.append(k, String(v));
+      }
+    });
+
+    // Use fetch with text/plain to avoid CORS preflight
     fetch(SHEETS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ ...payload, secret: APP_SECRET })
+      body: params.toString()
     })
     .then(r => r.text())
     .then(t => {
@@ -1665,9 +1642,9 @@ async function callSheetsWithFeedback(payload, loadingMsg) {
   }
 }
 
-function switchLoginTab(t, btn) {
+function switchLoginTab(t) {
   document.querySelectorAll('.login-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  event.target.classList.add('active');
   document.getElementById('login-officer').style.display = t==='officer'?'block':'none';
   document.getElementById('login-track').style.display   = t==='track'?'block':'none';
 }
@@ -1806,38 +1783,9 @@ async function loadCasesFromSheets() {
 
 function trackCase() {
   const token = document.getElementById('track-token').value.toUpperCase().trim();
-  if (currentUser) {
-    // Authenticated — use the in-app track tab
-    showScreen('app'); showTab('track');
-    document.getElementById('track-input').value = token;
-    setTimeout(doTrack, 200);
-  } else {
-    // Public — look up inline on login screen
-    const resultEl = document.getElementById('track-result-public');
-    if (!token) { resultEl.innerHTML = ''; return; }
-    const c = cases.find(x => x.token === token || x.id === token);
-    if (!c) {
-      resultEl.innerHTML = `<div class="warn-box"><strong>Token not found.</strong> Please check the token number and try again.</div>`;
-      return;
-    }
-    resultEl.innerHTML = `
-      <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-          <div><div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Token</div><span class="token-badge">${c.token}</span></div>
-          <div>${statusPill(c.status)}</div>
-        </div>
-        <div class="detail-grid" style="margin-bottom:16px;">
-          <div class="detail-item"><div class="dk">Case Type</div><div class="dv">${caseTypeLabel(c.caseType)}</div></div>
-          <div class="detail-item"><div class="dk">Court</div><div class="dv">${c.court}</div></div>
-          <div class="detail-item"><div class="dk">Routed To</div><div class="dv">${c.route}</div></div>
-        </div>
-        <div style="font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--teal-bright);margin-bottom:12px;font-weight:600;">Case Timeline</div>
-        <div class="track-timeline">${renderTimeline(c)}</div>
-        <div class="info-box" style="margin-top:14px;">
-          <strong>Updates:</strong> Sent via ${c.contactPref||'WhatsApp'}. For urgent help: <strong>+94 77 362 2211</strong> (LexLK).
-        </div>
-      </div>`;
-  }
+  showScreen('app'); showTab('track');
+  document.getElementById('track-input').value = token;
+  setTimeout(doTrack, 200);
 }
 
 // ══════════════════════════════════
@@ -2145,15 +2093,14 @@ function validateStep3W(){
 
 // ── Doc checklist ──
 function buildDocChecklist(){
-  const CONSENT_ITEM='Signed Consent Letter from client / petitioner (required)';
   const checklists={
-    land:[CONSENT_ITEM,'NIC of client (required)','Land Deed / Title Certificate (required)','Survey Plan / Lot Plan (required)','Tax Receipts / Rate Receipts','GN Certification or Letter','Photos of the boundary / encroachment','Any previous court orders'],
-    family:[CONSENT_ITEM,'NIC of client (required)','Marriage Certificate (required)','Birth Certificates of children (if custody involved) (required)','Proof of income (for maintenance)','Medical reports (if domestic violence)','Any previous court orders or protection orders'],
-    debt:[CONSENT_ITEM,'NIC of client (required)','Written loan agreement / Promissory Note (required)','Bank statements or transfer records','Receipts for any payments made','Any correspondence, messages or WhatsApp screenshots'],
-    assault:[CONSENT_ITEM,'NIC of client (required)','Police Complaint reference number (required)','Medical reports / injury photographs (required)','Witness names and contacts','Any CCTV footage or photographs'],
-    labour:[CONSENT_ITEM,'NIC of client (required)','Employment contract or letter of appointment (required)','Termination letter','Pay slips or wage records','EPF/ETF statement'],
-    criminal:[CONSENT_ITEM,'NIC of client (required)','Police complaint reference (required)','Evidence (photos, records, messages)','Witness list and contacts','Medical or forensic reports if applicable'],
-    default:[CONSENT_ITEM,'NIC of client (required)','Any written evidence relating to the case','Witness details if available']
+    land:['Land Deed / Title Certificate (required)','Survey Plan / Lot Plan (required)','Tax Receipts / Rate Receipts','GN Certification or Letter','Photos of the boundary / encroachment','Any previous court orders'],
+    family:['Marriage Certificate (required)','Birth Certificates of children (if custody involved) (required)','Proof of income (for maintenance)','Medical reports (if domestic violence)','Any previous court orders or protection orders'],
+    debt:['Written loan agreement / Promissory Note (required)','Bank statements or transfer records','Receipts for any payments made','Any correspondence, messages or WhatsApp screenshots'],
+    assault:['Police Complaint reference number (required)','Medical reports / injury photographs (required)','Witness names and contacts','Any CCTV footage or photographs'],
+    labour:['Employment contract or letter of appointment (required)','Termination letter','Pay slips or wage records','EPF/ETF statement'],
+    criminal:['Police complaint reference (required)','Evidence (photos, records, messages)','Witness list and contacts','Medical or forensic reports if applicable'],
+    default:['NIC of client (required)','Any written evidence relating to the case','Witness details if available']
   };
   const items=checklists[selectedCaseType]||checklists.default;
   let uploadedCount=0;
@@ -2169,19 +2116,6 @@ function buildDocChecklist(){
   }).join('');
   updateUploadBadge();
 }
-function validateStep4W(){
-  // Consent letter is always item index 0 in every checklist — hard gate
-  const consentBox=document.getElementById("dcheck-0");
-  if(!consentBox||!consentBox.checked){
-    showAlert("⚠ A signed Consent Letter from the client / petitioner is required before proceeding. Please obtain and upload it, then tick the checkbox to confirm.", "error");
-    // Highlight the consent row
-    const firstItem=document.querySelector("#doc-checklist .check-item");
-    if(firstItem){firstItem.style.outline="2px solid var(--red)";firstItem.style.borderRadius="6px";setTimeout(()=>{firstItem.style.outline="";},3000);}
-    return;
-  }
-  goWStep(5);
-}
-
 function updateUploadBadge(){
   const badge=document.getElementById('upload-count-badge');
   const n=uploadedFiles.length;
@@ -2231,208 +2165,16 @@ function buildCourtOptions(){
   const courtMap={land:'District Court',family:'District Court',debt:'District Court',contract:'District Court',consumer:'District Court',inheritance:'District Court',environment:'District Court',assault:"Magistrates' Court",criminal:"Magistrates' Court",labour:'Labour Tribunal',domestic:"Magistrates' Court",other:'District Court'};
   const recommended=courtMap[selectedCaseType]||'District Court';
   const districtCourts={
-    'Colombo':[
-      'Colombo District Court',
-      "Colombo Chief Magistrates' Court (Fort)",
-      "Colombo Magistrates' Court (Maligakanda)",
-      "Mount Lavinia Magistrates' Court",
-      "Nugegoda Magistrates' Court",
-      "Kaduwela Magistrates' Court",
-      "Homagama Magistrates' Court",
-      "Homagama District Court",
-      "Kaduwela District Court",
-      'Labour Tribunal — Colombo',
-      "Children's Magistrates' Court — Battaramulla"
-    ],
-    'Gampaha':[
-      'Gampaha District Court',
-      "Gampaha Magistrates' Court",
-      "Mahara Magistrates' Court (Kadawatha)",
-      "Wattala Magistrates' Court",
-      "Negombo District Court",
-      "Negombo Magistrates' Court",
-      "Attanagalla District/Magistrates' Court",
-      "Minuwangoda District/Magistrates' Court",
-      "Pugoda District/Magistrates' Court",
-      'Labour Tribunal — Gampaha',
-      'Labour Tribunal — Negombo',
-      'Labour Tribunal — Wattala'
-    ],
-    'Kalutara':[
-      'Kalutara District Court',
-      "Kalutara Magistrates' Court",
-      "Panadura District Court",
-      "Panadura Magistrates' Court",
-      "Horana District Court",
-      "Horana Magistrates' Court",
-      "Matugama District Court",
-      "Matugama Magistrates' Court",
-      'Labour Tribunal — Kalutara',
-      'Labour Tribunal — Panadura'
-    ],
-    'Kandy':[
-      'Kandy District Court',
-      "Kandy Magistrates' Court",
-      "Gampola District/Magistrates' Court",
-      "Nawalapitiya Magistrates' Court",
-      "Teldeniya District/Magistrates' Court",
-      'Labour Tribunal — Kandy'
-    ],
-    'Matale':[
-      "Matale District/Magistrates' Court",
-      "Dambulla District/Magistrates' Court",
-      "Naula Magistrates' Court"
-    ],
-    'Nuwara Eliya':[
-      'Nuwara Eliya District Court',
-      "Nuwara Eliya Magistrates' Court",
-      "Hatton District/Magistrates' Court",
-      "Walapane District/Magistrates' Court",
-      'Labour Tribunal — Nuwara Eliya',
-      'Labour Tribunal — Hatton',
-      'Labour Tribunal — Thalawakele'
-    ],
-    'Galle':[
-      'Galle District Court',
-      "Galle Magistrates' Court",
-      "Elpitiya District Court",
-      "Elpitiya Magistrates' Court",
-      "Balapitiya District Court",
-      "Balapitiya Magistrates' Court",
-      "Udugama District/Magistrates' Court",
-      "Baddegama District/Magistrates' Court",
-      'Labour Tribunal — Galle'
-    ],
-    'Matara':[
-      'Matara District Court',
-      "Matara Magistrates' Court",
-      "Deiyandara Magistrates' Court",
-      "Kotapola (Morawaka) District/Magistrates' Court"
-    ],
-    'Hambantota':[
-      "Hambantota District/Magistrates' Court",
-      "Tangalle District/Magistrates' Court",
-      "Walasmulla District/Magistrates' Court",
-      "Tissamaharama District/Magistrates' Court",
-      "Angunakolapelessa Magistrates' Court"
-    ],
-    'Jaffna':[
-      'Jaffna District Court',
-      "Jaffna Magistrates' Court",
-      "Point Pedro District Court",
-      "Point Pedro Magistrates' Court",
-      "Chavakachcheri District/Magistrates' Court",
-      "Mallakam District/Magistrates' Court",
-      "Kayts District/Magistrates' Court",
-      "Children's Magistrates' Court — Jaffna",
-      'Labour Tribunal — Jaffna'
-    ],
-    'Kilinochchi':[
-      "Kilinochchi District/Magistrates' Court"
-    ],
-    'Mannar':[
-      "Mannar District/Magistrates' Court"
-    ],
-    'Vavuniya':[
-      "Vavuniya District/Magistrates' Court",
-      'Labour Tribunal — Vavuniya'
-    ],
-    'Mullaitivu':[
-      "Mullaitivu District/Magistrates' Court"
-    ],
-    'Batticaloa':[
-      'Batticaloa District Court',
-      "Batticaloa Magistrates' Court",
-      "Kalmunai District Court",
-      "Kalmunai Magistrates' Court",
-      "Akkaraipattu District Court",
-      "Akkaraipattu Magistrates' Court",
-      "Valachchenai District/Magistrates' Court",
-      "Samanthure Magistrates' Court",
-      'Labour Tribunal — Batticaloa'
-    ],
-    'Ampara':[
-      "Ampara District/Magistrates' Court",
-      "Pothuvil District/Magistrates' Court",
-      "Dehiattakandiya Magistrates' Court"
-    ],
-    'Trincomalee':[
-      'Trincomalee District Court',
-      "Trincomalee Magistrates' Court",
-      "Muttur District/Magistrates' Court",
-      "Kanthale District/Magistrates' Court",
-      'Labour Tribunal — Trincomalee'
-    ],
-    'Kurunegala':[
-      'Kurunegala District Court',
-      "Kurunegala Magistrates' Court",
-      "Kuliyapitiya District Court",
-      "Kuliyapitiya Magistrates' Court",
-      "Maho District/Magistrates' Court",
-      "Wariyapola District/Magistrates' Court",
-      "Nikaweratiya District/Magistrates' Court",
-      "Polagahawela Magistrates' Court",
-      "Pilessa Magistrates' Court",
-      "Rambadagalla Magistrates' Court",
-      "Galgamuwa Magistrates' Court",
-      "Hettipola Magistrates' Court",
-      "Anamaduwa Magistrates' Court",
-      'Labour Tribunal — Kurunegala'
-    ],
-    'Puttalam':[
-      "Puttalam District/Magistrates' Court",
-      "Chilaw District/Magistrates' Court",
-      "Marawila District/Magistrates' Court",
-      "Anamaduwa Magistrates' Court",
-      'Labour Tribunal — Chilaw'
-    ],
-    'Anuradhapura':[
-      'Anuradhapura District Court',
-      "Anuradhapura Magistrates' Court",
-      "Thambuththegama Magistrates' Court",
-      "Kekirawa District/Magistrates' Court",
-      "Kebithigollewa District/Magistrates' Court",
-      'Labour Tribunal — Anuradhapura'
-    ],
-    'Polonnaruwa':[
-      "Polonnaruwa District/Magistrates' Court",
-      "Hingurakgoda District/Magistrates' Court"
-    ],
-    'Badulla':[
-      'Badulla District Court',
-      "Badulla Magistrates' Court",
-      "Bandarawela District Court",
-      "Bandarawela Magistrates' Court",
-      "Welimada District/Magistrates' Court",
-      "Mahiyanganaya District/Magistrates' Court",
-      "Bibile Magistrates' Court",
-      "Siyabalanduwa Magistrates' Court",
-      'Labour Tribunal — Badulla',
-      'Labour Tribunal — Bandarawela'
-    ],
-    'Monaragala':[
-      "Monaragala District/Magistrates' Court",
-      "Wellawaya District/Magistrates' Court"
-    ],
-    'Ratnapura':[
-      'Ratnapura District Court',
-      "Ratnapura Magistrates' Court",
-      "Embilipitiya District Court",
-      "Embilipitiya Magistrates' Court",
-      "Balangoda District/Magistrates' Court",
-      "Pelmadulla District/Magistrates' Court",
-      'Labour Tribunal — Ratnapura',
-      'Labour Tribunal — Embilipitiya (Circuit)'
-    ],
-    'Kegalle':[
-      'Kegalle District Court',
-      "Kegalle Magistrates' Court",
-      "Warakapola District/Magistrates' Court",
-      "Mawanella District/Magistrates' Court",
-      "Ruwanwella District/Magistrates' Court",
-      'Labour Tribunal — Kegalle'
-    ],
-  };;
+    'Colombo':['Colombo District Court',"Colombo Magistrates' Court",'Labour Tribunal — Colombo'],
+    'Kandy':['Kandy District Court',"Kandy Magistrates' Court",'Labour Tribunal — Kandy'],
+    'Galle':['Galle District Court',"Galle Magistrates' Court"],
+    'Kurunegala':['Kurunegala District Court',"Kurunegala Magistrates' Court"],
+    'Jaffna':['Jaffna District Court',"Jaffna Magistrates' Court",'Labour Tribunal — Jaffna'],
+    'Anuradhapura':['Anuradhapura District Court',"Anuradhapura Magistrates' Court"],
+    'Matara':['Matara District Court',"Matara Magistrates' Court"],
+    'Badulla':['Badulla District Court',"Badulla Magistrates' Court"],
+    'Ratnapura':['Ratnapura District Court',"Ratnapura Magistrates' Court"],
+  };
   const courts=districtCourts[dist]||[`${dist||'Nearest'} District Court`,`${dist||'Nearest'} Magistrates' Court`,'Nearest Labour Tribunal'];
   const sorted=[...courts].sort((a,b)=>(b.includes(recommended)?1:0)-(a.includes(recommended)?1:0));
   document.getElementById('court-options').innerHTML=sorted.map((c,i)=>`
@@ -2542,7 +2284,7 @@ async function submitCase(){
   const btn = document.querySelector('[onclick="submitCase()"]');
   if(btn){ btn.disabled=true; btn.textContent='⏳ Saving to Google Drive…'; }
 
-  const token='GU-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000));
+  const token='GU-'+new Date().getFullYear()+'-'+String(100000+cases.length+1).slice(1);
   const clientName = document.getElementById('c-name')?.value||'Unknown';
 
   const newCase={
@@ -2550,7 +2292,7 @@ async function submitCase(){
     client:clientName,
     nic:document.getElementById('c-nic')?.value||'',
     mobile:document.getElementById('c-mobile')?.value||'',
-    address:document.getElementById('c-addr')?.value||'',
+    address:document.getElementById('c-address')?.value||'',
     district:document.getElementById('c-district')?.value||'',
     caseType:selectedCaseType||'other',
     caseSubtype:document.getElementById('case-subtype')?.value||'',
@@ -3079,7 +2821,7 @@ function printClientCopy(){
       <div class="print-sig-line">Date<br>${c.created}</div>
     </div>
     <div class="print-footer">
-      Justice LK · © 2026 Elmo Richard Pereira. All rights reserved. · +94 77 362 2211<br>
+      Justice LK · © 2026 Ace Dynamics Trading · +94 77 362 2211<br>
       <span class="print-notice">This document was generated by an AI-assisted system and reviewed by a Field Officer. It does not constitute formal legal advice. All legal matters should be confirmed by a qualified Sri Lankan attorney before court proceedings.</span>
     </div>`;
 
@@ -3241,8 +2983,7 @@ function doTrack(){
 }
 
 // ── Init ──
-// Only call renderDashboard if user is already authenticated (e.g. on hot reload)
-if (currentUser) renderDashboard();
+renderDashboard();
 updateEngineLabel();
 // Restore saved keys on page load
 setTimeout(loadSavedKeys, 100);
@@ -3284,7 +3025,7 @@ async function loadLawyerApps() {
 
   try {
     const res  = await callSheets({ action: 'listLawyerApps', secret: APP_SECRET });
-    const apps = res.applications || res.data || [];
+    const apps = res.data || [];
     lawyerAppsCache = apps;
 
     const filter = document.getElementById('la-filter-status')?.value || '';
@@ -3391,7 +3132,7 @@ function viewLawyerApp(ref) {
     ${app.profilePhotoUrl ? `<div style="margin-bottom:10px;"><div class="detail-label">Profile Photo</div><a href="${app.profilePhotoUrl}" target="_blank" style="color:var(--teal);font-size:0.85rem;">📎 View Photo</a></div>` : ''}
     <div style="margin-top:12px;">
       <div class="detail-label">Admin Notes</div>
-      <textarea id="la-notes" rows="3" placeholder="Add internal notes about this application…" style="width:100%;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:0.88rem;resize:vertical;">${app.notes||''}</textarea>
+      <textarea id="la-notes" rows="3" placeholder="Add internal notes about this application…" style="width:100%;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;resize:vertical;">${app.notes||''}</textarea>
     </div>`;
 
   document.getElementById('la-modal-footer').innerHTML = `
@@ -3451,14 +3192,6 @@ if ('serviceWorker' in navigator) {
           }
         });
       });
-
-      // Listen for sync completion messages from SW
-      navigator.serviceWorker.addEventListener('message', event => {
-        const msg = event.data;
-        if (msg?.type === 'SYNC_COMPLETE') {
-          handleSyncComplete(msg);
-        }
-      });
     } catch (err) {
       console.warn('[PWA] SW registration failed:', err);
     }
@@ -3505,16 +3238,18 @@ window.addEventListener('appinstalled', () => {
 const offlineBar = document.getElementById('offline-indicator');
 function updateOnlineStatus() {
   if (!navigator.onLine) {
-    // Remember provider before going offline
+    offlineBar.classList.add('show');
+    offlineBar.textContent = '⚡ Offline — Switched to Ollama for AI. All case features work normally.';
+    // Auto switch to Ollama when offline
     if (aiProvider === 'groq' || aiProvider === 'claude') {
-      localStorage.setItem('gu_provider_before_offline', aiProvider);
       aiProvider = 'ollama';
       localStorage.setItem('gu_provider', 'ollama');
       const lbl = document.getElementById('ai-engine-label');
       if (lbl) lbl.textContent = 'Ollama';
     }
   } else {
-    // Auto switch back to saved provider when online
+    offlineBar.classList.remove('show');
+    // Auto switch back to Groq when online
     const saved = localStorage.getItem('gu_provider_before_offline');
     if (saved && (aiProvider === 'ollama' || aiProvider === 'offline')) {
       aiProvider = saved;
@@ -3526,6 +3261,12 @@ function updateOnlineStatus() {
     }
   }
 }
+window.addEventListener('offline', function() {
+  // Remember what provider we were using before going offline
+  if (aiProvider === 'groq' || aiProvider === 'claude') {
+    localStorage.setItem('gu_provider_before_offline', aiProvider);
+  }
+});
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
@@ -3558,10 +3299,10 @@ function renderStats(cases) {
     } catch(e) { return false; }
   }).length;
 
-  document.getElementById('stat-total').textContent     = total;
-  document.getElementById('stat-pending').textContent   = pending;
+  document.getElementById('stats-total').textContent    = total;
+  document.getElementById('stats-pending').textContent  = pending;
   document.getElementById('stat-assigned').textContent  = assigned;
-  document.getElementById('stat-closed').textContent    = closed;
+  document.getElementById('stats-closed').textContent   = closed;
   document.getElementById('stat-districts').textContent = districts;
   document.getElementById('stat-thismonth').textContent = thisMonth;
 
@@ -3614,689 +3355,6 @@ function renderBarChart(elId, data, maxVal, color, wide) {
   }).join('');
 }
 
-</script>
-
-<!-- ════════════════════════════════════════
-     OFFLINE MANAGER — JusticeLK v1.0
-     IndexedDB · Background Sync · PWA
-     © 2026 Elmo Richard Pereira
-═══════════════════════════════════════════ -->
-<script>
-// ════════════════════════════════════════════════════════
-//  JusticeLK Offline Manager v1.0
-//  Handles: IndexedDB · Offline save · Background sync · UI
-//  © 2026 Elmo Richard Pereira · Ace Dynamics Trading
-// ════════════════════════════════════════════════════════
-
-const OFFLINE_DB_NAME    = 'JusticeLK_Offline';
-const OFFLINE_DB_VERSION = 1;
-const STORE_CASES        = 'pending_cases';
-const SYNC_TAG           = 'justicelk-case-sync';
-
-let offlineDB = null;
-
-// ══════════════════════
-//  INIT ON PAGE LOAD
-// ══════════════════════
-async function initOfflineManager() {
-  try {
-    offlineDB = await openOfflineDB();
-    console.log('[Offline] IndexedDB ready');
-  } catch(e) {
-    console.warn('[Offline] IndexedDB not available:', e);
-  }
-
-  // Wire offline sync message listener and update toast to the shared SW registration
-  if (swRegistration) {
-    // Prompt update if new SW waiting
-    swRegistration.addEventListener('updatefound', () => {
-      const newWorker = swRegistration.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showOfflineToast('🔄 Update available — refresh to get the latest version.', 'info', 8000);
-        }
-      });
-    });
-  }
-
-  // Watch online/offline events
-  window.addEventListener('online',  handleOnline);
-  window.addEventListener('offline', handleOffline);
-
-  // Render initial status indicator
-  renderOfflineStatus();
-
-  // If we just came online, try to sync pending
-  if (navigator.onLine) {
-    const pending = await countPendingCases();
-    if (pending > 0) {
-      updateSyncBadge(pending);
-      // Small delay then auto-sync
-      setTimeout(() => triggerSync('auto'), 2000);
-    }
-  }
-}
-
-// ══════════════════════
-//  INDEXEDDB
-// ══════════════════════
-function openOfflineDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION);
-
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_CASES)) {
-        const store = db.createObjectStore(STORE_CASES, { keyPath: 'token' });
-        store.createIndex('synced',  'synced',  { unique: false });
-        store.createIndex('savedAt', 'savedAt', { unique: false });
-      }
-    };
-
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-function saveOfflineCase(caseData) {
-  return new Promise((resolve, reject) => {
-    if (!offlineDB) { reject(new Error('DB not ready')); return; }
-    const tx    = offlineDB.transaction(STORE_CASES, 'readwrite');
-    const store = tx.objectStore(STORE_CASES);
-    const record = {
-      ...caseData,
-      synced:   0,
-      savedAt:  new Date().toISOString(),
-      syncedAt: null,
-    };
-    const req = store.put(record);
-    req.onsuccess = () => resolve(record);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-function getAllOfflineCases() {
-  return new Promise((resolve, reject) => {
-    if (!offlineDB) { resolve([]); return; }
-    const tx    = offlineDB.transaction(STORE_CASES, 'readonly');
-    const store = tx.objectStore(STORE_CASES);
-    const req   = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-function getPendingCases() {
-  return new Promise((resolve, reject) => {
-    if (!offlineDB) { resolve([]); return; }
-    const tx    = offlineDB.transaction(STORE_CASES, 'readonly');
-    const store = tx.objectStore(STORE_CASES);
-    const index = store.index('synced');
-    const req   = index.getAll(0);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-  });
-}
-
-function countPendingCases() {
-  return new Promise((resolve) => {
-    if (!offlineDB) { resolve(0); return; }
-    const tx    = offlineDB.transaction(STORE_CASES, 'readonly');
-    const store = tx.objectStore(STORE_CASES);
-    const index = store.index('synced');
-    const req   = index.count(0);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => resolve(0);
-  });
-}
-
-function markCaseSynced(token) {
-  return new Promise((resolve, reject) => {
-    if (!offlineDB) { resolve(); return; }
-    const tx    = offlineDB.transaction(STORE_CASES, 'readwrite');
-    const store = tx.objectStore(STORE_CASES);
-    const req   = store.get(token);
-    req.onsuccess = () => {
-      const record = req.result;
-      if (record) {
-        record.synced   = 1;
-        record.syncedAt = new Date().toISOString();
-        store.put(record);
-      }
-      resolve();
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
-
-// ══════════════════════
-//  OFFLINE CASE SAVE
-//  (called by submitCase when offline)
-// ══════════════════════
-async function saveNewCaseOffline(caseData) {
-  try {
-    await saveOfflineCase(caseData);
-    const pending = await countPendingCases();
-    updateSyncBadge(pending);
-    showOfflineToast(
-      `📥 Case saved offline (${caseData.token}). Will sync automatically when internet returns.`,
-      'offline',
-      6000
-    );
-    // Register background sync with service worker
-    if ('serviceWorker' in navigator && 'SyncManager' in window) {
-      const reg = await navigator.serviceWorker.ready;
-      await reg.sync.register(SYNC_TAG);
-    }
-    return true;
-  } catch(e) {
-    console.error('[Offline] Failed to save case offline:', e);
-    showOfflineToast('❌ Could not save offline. Please note your case details.', 'error', 8000);
-    return false;
-  }
-}
-
-// ══════════════════════════════════════════
-//  MANUAL / AUTO SYNC
-//  (posts pending cases to Cloudflare Worker)
-// ══════════════════════════════════════════
-let isSyncing = false;
-
-async function triggerSync(source) {
-  if (isSyncing) return;
-  if (!navigator.onLine) {
-    showOfflineToast('📡 No internet connection. Cases are queued for when you reconnect.', 'offline', 4000);
-    return;
-  }
-
-  const pending = await getPendingCases();
-  if (pending.length === 0) {
-    if (source === 'manual') {
-      showOfflineToast('✅ All cases are already synced.', 'success', 3000);
-    }
-    return;
-  }
-
-  isSyncing = true;
-  updateSyncButton('syncing');
-  showOfflineToast(`🔄 Syncing ${pending.length} offline case(s)...`, 'info', 3000);
-
-  // Try SW background sync first (best for reliability)
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      await reg.sync.register(SYNC_TAG);
-      // SW will notify us via postMessage when done
-      return;
-    } catch(e) {
-      console.warn('[Offline] SyncManager failed, falling back to direct sync');
-    }
-  }
-
-  // Fallback: sync directly from page
-  await syncDirectly(pending);
-}
-
-async function syncDirectly(pendingCases) {
-  const WORKER = 'https://lexlk.acedynamicstrading.workers.dev';
-  let synced = 0, failed = 0;
-
-  for (const caseData of pendingCases) {
-    try {
-      const res = await fetch(WORKER, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action:         'saveCase',
-          token:          caseData.token,
-          clientName:     caseData.client,
-          nic:            caseData.nic,
-          mobile:         caseData.mobile,
-          district:       caseData.district,
-          caseType:       caseData.caseType,
-          status:         caseData.status || 'Pending',
-          officer:        caseData.officer,
-          created:        caseData.created,
-          court:          caseData.court,
-          route:          caseData.route,
-          facts:          caseData.facts,
-          brief:          caseData.brief,
-          relief:         caseData.relief,
-          lawyer:         caseData.lawyer ? `${caseData.lawyer.name} (${caseData.lawyer.reg})` : '',
-          offlineSync:    true,
-          savedOfflineAt: caseData.savedAt,
-        })
-      });
-
-      if (res.ok) {
-        await markCaseSynced(caseData.token);
-        synced++;
-      } else {
-        failed++;
-      }
-    } catch(e) {
-      failed++;
-    }
-  }
-
-  handleSyncComplete({ synced, failed, total: pendingCases.length });
-}
-
-function handleSyncComplete(msg) {
-  isSyncing = false;
-  const { synced, failed, total } = msg;
-
-  if (synced > 0 && failed === 0) {
-    showOfflineToast(`✅ ${synced} case${synced > 1 ? 's' : ''} synced successfully!`, 'success', 5000);
-  } else if (synced > 0 && failed > 0) {
-    showOfflineToast(`⚠️ ${synced} synced, ${failed} failed. Will retry automatically.`, 'warning', 6000);
-  } else if (failed > 0) {
-    showOfflineToast(`❌ Sync failed for ${failed} case(s). Will retry when connection is stable.`, 'error', 6000);
-  }
-
-  // Update badge
-  countPendingCases().then(count => {
-    updateSyncBadge(count);
-    updateSyncButton(count > 0 ? 'pending' : 'clear');
-  });
-}
-
-// ══════════════════════
-//  ONLINE / OFFLINE EVENTS
-// ══════════════════════
-function handleOnline() {
-  console.log('[Offline] Connection restored');
-  updateOnlineIndicator(true);
-  showOfflineToast('📡 Connection restored!', 'success', 2000);
-  // Restore AI provider and auto-sync
-  if (typeof updateOnlineStatus === 'function') updateOnlineStatus();
-  setTimeout(() => triggerSync('auto'), 1500);
-}
-
-function handleOffline() {
-  console.log('[Offline] Connection lost');
-  updateOnlineIndicator(false);
-  showOfflineToast('📵 Offline — cases will be saved locally and sync when you reconnect.', 'offline', 5000);
-}
-
-// ══════════════════════
-//  UI COMPONENTS
-// ══════════════════════
-function renderOfflineStatus() {
-  // Remove existing if any
-  const existing = document.getElementById('offline-bar');
-  if (existing) existing.remove();
-
-  const bar = document.createElement('div');
-  bar.id = 'offline-bar';
-  bar.innerHTML = `
-    <style>
-      #offline-bar {
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 16px;
-        font-family: 'Nunito', sans-serif;
-        font-size: 12px;
-        font-weight: 700;
-        transition: all 0.3s ease;
-        border-bottom: 2px solid transparent;
-      }
-      #offline-bar.online  { background: #0a1628; border-color: #12b8a8; color: rgba(255,255,255,0.6); }
-      #offline-bar.offline { background: #7f1d1d; border-color: #ef4444; color: #fca5a5; }
-      #offline-bar .obar-left  { display: flex; align-items: center; gap: 8px; }
-      #offline-bar .obar-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-      #offline-bar.online  .obar-dot { background: #12b8a8; animation: pulse 2s infinite; }
-      #offline-bar.offline .obar-dot { background: #ef4444; }
-      #offline-bar .obar-right { display: flex; align-items: center; gap: 10px; }
-      #sync-badge {
-        background: #ef4444;
-        color: #fff;
-        border-radius: 999px;
-        padding: 1px 7px;
-        font-size: 11px;
-        font-weight: 800;
-        display: none;
-      }
-      #sync-btn {
-        background: #12b8a8;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 3px 10px;
-        font-family: 'Nunito', sans-serif;
-        font-size: 11px;
-        font-weight: 800;
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        gap: 5px;
-      }
-      #sync-btn:hover { background: #0d9488; }
-      #sync-btn.syncing { background: #d4a843; cursor: not-allowed; }
-      #offline-toast-container {
-        position: fixed;
-        bottom: 20px; left: 50%;
-        transform: translateX(-50%);
-        z-index: 99999;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        align-items: center;
-        pointer-events: none;
-        min-width: 260px;
-        max-width: 90vw;
-      }
-      .offline-toast {
-        font-family: 'Nunito', sans-serif;
-        font-size: 13px;
-        font-weight: 700;
-        padding: 10px 18px;
-        border-radius: 10px;
-        animation: toastIn 0.3s ease;
-        text-align: center;
-        line-height: 1.4;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        pointer-events: auto;
-      }
-      .toast-offline { background: #1c3250; color: #93c5fd; border: 1px solid rgba(147,197,253,0.2); }
-      .toast-success { background: #064e3b; color: #6ee7b7; border: 1px solid rgba(110,231,183,0.2); }
-      .toast-warning { background: #78350f; color: #fcd34d; border: 1px solid rgba(252,211,77,0.2);  }
-      .toast-error   { background: #7f1d1d; color: #fca5a5; border: 1px solid rgba(252,165,165,0.2); }
-      .toast-info    { background: #1e3a5f; color: #93c5fd; border: 1px solid rgba(147,197,253,0.2); }
-      @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-      @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-
-      /* Offline indicator in case list */
-      .case-offline-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(239,68,68,0.15);
-        color: #ef4444;
-        border: 1px solid rgba(239,68,68,0.3);
-        border-radius: 6px;
-        padding: 1px 7px;
-        font-size: 10px;
-        font-weight: 800;
-      }
-      .case-synced-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(18,184,168,0.1);
-        color: #12b8a8;
-        border: 1px solid rgba(18,184,168,0.2);
-        border-radius: 6px;
-        padding: 1px 7px;
-        font-size: 10px;
-        font-weight: 800;
-      }
-    </style>
-
-    <div class="obar-left">
-      <div class="obar-dot"></div>
-      <span id="offline-status-text">Checking connection...</span>
-    </div>
-    <div class="obar-right">
-      <span id="sync-badge">0 pending</span>
-      <button id="sync-btn" onclick="triggerSync('manual')">🔄 Sync Now</button>
-    </div>
-  `;
-
-  document.body.insertBefore(bar, document.body.firstChild);
-
-  // Inject toast container
-  const toastCont = document.createElement('div');
-  toastCont.id = 'offline-toast-container';
-  document.body.appendChild(toastCont);
-
-  // Set initial state
-  updateOnlineIndicator(navigator.onLine);
-}
-
-function updateOnlineIndicator(isOnline) {
-  const bar  = document.getElementById('offline-bar');
-  const text = document.getElementById('offline-status-text');
-  if (!bar || !text) return;
-
-  if (isOnline) {
-    bar.className  = 'online';
-    text.textContent = '🌐 Online — JusticeLK';
-  } else {
-    bar.className  = 'offline';
-    text.textContent = '📵 Offline mode — cases saved locally';
-  }
-}
-
-function updateSyncBadge(count) {
-  const badge   = document.getElementById('sync-badge');
-  const syncBtn = document.getElementById('sync-btn');
-  if (!badge || !syncBtn) return;
-
-  if (count > 0) {
-    badge.style.display   = 'inline-block';
-    badge.textContent     = `${count} pending`;
-    syncBtn.style.display = 'inline-flex';
-    updateSyncButton('pending');
-  } else {
-    badge.style.display   = 'none';
-    syncBtn.style.display = 'none';
-  }
-}
-
-function updateSyncButton(state) {
-  const btn = document.getElementById('sync-btn');
-  if (!btn) return;
-
-  if (state === 'syncing') {
-    btn.className   = 'syncing';
-    btn.textContent = '⏳ Syncing...';
-    btn.disabled    = true;
-  } else if (state === 'pending') {
-    btn.className   = '';
-    btn.textContent = '🔄 Sync Now';
-    btn.disabled    = false;
-  } else {
-    btn.style.display = 'none';
-  }
-}
-
-function showOfflineToast(msg, type, duration) {
-  const container = document.getElementById('offline-toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className  = `offline-toast toast-${type || 'info'}`;
-  toast.textContent = msg;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.transition = 'opacity 0.4s';
-    toast.style.opacity    = '0';
-    setTimeout(() => toast.remove(), 400);
-  }, duration || 4000);
-}
-
-// ══════════════════════════════════════════════════════════
-//  PATCHED submitCase — offline-aware version
-//  Wraps the original submitCase to intercept when offline
-// ══════════════════════════════════════════════════════════
-const _originalSubmitCase = typeof submitCase === 'function' ? submitCase : null;
-
-async function submitCase() {
-  // Validate checkboxes first (same as original)
-  if (!document.getElementById('confirm-check1')?.checked ||
-      !document.getElementById('confirm-check2')?.checked ||
-      !document.getElementById('confirm-check3')?.checked) {
-    showAlert('Please tick all three confirmation checkboxes before submitting.', 'error');
-    return;
-  }
-
-  const btn = document.querySelector('[onclick="submitCase()"]');
-
-  // Build case data object (same as original)
-  const token = 'GU-' + new Date().getFullYear() + '-' + String(100000 + (cases?.length || 0) + 1).slice(1);
-  const clientName = document.getElementById('c-name')?.value || 'Unknown';
-
-  const newCase = {
-    id: token, token,
-    client:       clientName,
-    nic:          document.getElementById('c-nic')?.value          || '',
-    mobile:       document.getElementById('c-mobile')?.value       || '',
-    address:      document.getElementById('c-addr')?.value      || '',
-    district:     document.getElementById('c-district')?.value     || '',
-    caseType:     typeof selectedCaseType !== 'undefined' ? selectedCaseType : 'other',
-    caseSubtype:  document.getElementById('case-subtype')?.value   || '',
-    brief:        document.getElementById('case-brief')?.value     || '',
-    opp:          document.getElementById('opp-name')?.value       || '',
-    oppAddr:      document.getElementById('opp-addr')?.value       || '',
-    oppRel:       document.getElementById('opp-rel')?.value        || '',
-    incDate:      document.getElementById('inc-date')?.value       || '',
-    incLoc:       document.getElementById('inc-loc')?.value        || '',
-    facts:        document.getElementById('inc-facts')?.value      || '',
-    prevAttempts: document.getElementById('prev-attempts')?.value  || '',
-    witnesses:    document.getElementById('witnesses')?.value      || '',
-    relief:       document.getElementById('relief')?.value         || '',
-    route:        (typeof caseForm !== 'undefined' ? caseForm.route : null) || 'Government Legal Aid Commission',
-    court:        (typeof caseForm !== 'undefined' ? caseForm.court : null) || (typeof selectedCourt !== 'undefined' ? selectedCourt : '') || 'District Court',
-    council:      document.getElementById('council-select')?.value || '',
-    officerNotes: document.getElementById('officer-notes')?.value  || '',
-    affordStatus: typeof selectedAfford !== 'undefined' ? selectedAfford : 'no',
-    lawyer:       typeof selectedLawyer !== 'undefined' ? selectedLawyer : null,
-    status:       'Pending',
-    officer:      typeof currentUser !== 'undefined' ? currentUser : '',
-    officerName:  typeof currentUserName !== 'undefined' ? currentUserName : (typeof currentUser !== 'undefined' ? currentUser : ''),
-    lang:         document.getElementById('c-lang')?.value         || 'si',
-    contactPref:  document.getElementById('c-contact-pref')?.value || 'WhatsApp',
-    files:        typeof uploadedFiles !== 'undefined' ? uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type, dataUrl: f.dataUrl })) : [],
-    fileNames:    typeof uploadedFiles !== 'undefined' ? uploadedFiles.map(f => f.name) : [],
-    driveFiles:   [],
-    created:      new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' }),
-    aiSummary:    '',
-    petition:     '',
-    folderUrl:    '',
-    offline:      false,
-    history: [
-      { date: new Date().toISOString().split('T')[0], event: `Case registered by Field Officer ${(typeof currentUserName !== 'undefined' ? currentUserName : '') || (typeof currentUser !== 'undefined' ? currentUser : '')}`, by: typeof currentUser !== 'undefined' ? currentUser : '' },
-      { date: new Date().toISOString().split('T')[0], event: `${(typeof uploadedFiles !== 'undefined' ? uploadedFiles.length : 0)} document(s) uploaded`, by: 'System' },
-      { date: new Date().toISOString().split('T')[0], event: `Case file dispatched to: ${(typeof caseForm !== 'undefined' ? caseForm.route : null) || 'Government Legal Aid Commission'}`, by: 'System' },
-    ]
-  };
-
-  if (newCase.lawyer) {
-    newCase.history.push({ date: new Date().toISOString().split('T')[0], event: `Case assigned to ${newCase.lawyer.name} (${newCase.lawyer.reg})`, by: 'System' });
-  }
-
-  // ── OFFLINE PATH ──
-  if (!navigator.onLine) {
-    if (btn) { btn.disabled = true; btn.textContent = '📥 Saving offline...'; }
-
-    newCase.offline = true;
-    newCase.history.push({ date: newCase.created, event: '📵 Saved offline — will sync when internet returns', by: 'System' });
-
-    // Save to local cases array
-    if (typeof cases !== 'undefined') cases.unshift(newCase);
-    currentCaseForSummary = newCase;
-
-    // Save to IndexedDB
-    await saveNewCaseOffline(newCase);
-
-    if (btn) { btn.disabled = false; btn.textContent = '✓ Issue Token & Submit'; }
-
-    // Show token screen
-    if (typeof renderTokenReceipt === 'function') renderTokenReceipt(newCase);
-    if (typeof goWStep === 'function') goWStep(7);
-
-    return;
-  }
-
-  // ── ONLINE PATH — original behaviour ──
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving to Google Drive…'; }
-
-  try {
-    const saveResult = await callSheets({
-      action:     'saveCase',
-      token:      newCase.token,
-      clientName: newCase.client,
-      nic:        newCase.nic,
-      mobile:     newCase.mobile,
-      district:   newCase.district,
-      caseType:   newCase.caseType,
-      status:     'Pending',
-      officer:    newCase.officer,
-      created:    newCase.created,
-      court:      newCase.court,
-      route:      newCase.route,
-      facts:      newCase.facts,
-      lawyer:     newCase.lawyer ? newCase.lawyer.name + ' (' + newCase.lawyer.reg + ')' : ''
-    });
-    if (saveResult.ok) {
-      newCase.folderUrl = saveResult.folderUrl || '';
-      newCase.history.push({ date: newCase.created, event: 'Case saved to Google Drive ✓', by: 'System' });
-    } else {
-      // Save failed — go offline
-      newCase.offline = true;
-      newCase.history.push({ date: newCase.created, event: 'Server error — saved offline for retry', by: 'System' });
-      await saveNewCaseOffline(newCase);
-    }
-  } catch(e) {
-    // Network error — save offline
-    newCase.offline = true;
-    newCase.history.push({ date: newCase.created, event: 'Offline — case saved locally only', by: 'System' });
-    await saveNewCaseOffline(newCase);
-  }
-
-  // Upload files if online
-  if (typeof uploadedFiles !== 'undefined' && uploadedFiles.length > 0 && navigator.onLine) {
-    if (btn) btn.textContent = `⏳ Uploading ${uploadedFiles.length} file(s)…`;
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      const f = uploadedFiles[i];
-      try {
-        const base64 = f.dataUrl ? f.dataUrl.split(',')[1] : null;
-        if (!base64) continue;
-        const upResult = await callSheets({
-          action: 'uploadFile', token: newCase.token, clientName: newCase.client,
-          filename: f.name, mimeType: f.type || 'application/octet-stream', base64data: base64
-        });
-        if (upResult.ok) {
-          newCase.driveFiles.push({ name: f.name, viewUrl: upResult.viewUrl, fileId: upResult.fileId });
-          newCase.history.push({ date: newCase.created, event: 'File uploaded: ' + f.name + ' ✓', by: 'System' });
-        }
-      } catch(e) {
-        newCase.history.push({ date: newCase.created, event: 'File upload failed: ' + f.name, by: 'System' });
-      }
-    }
-  }
-
-  if (typeof cases !== 'undefined') cases.unshift(newCase);
-  currentCaseForSummary = newCase;
-  if (btn) { btn.disabled = false; btn.textContent = '✓ Issue Token & Submit'; }
-  if (typeof renderTokenReceipt === 'function') renderTokenReceipt(newCase);
-  if (typeof goWStep === 'function') goWStep(7);
-  if (typeof generateAISummary === 'function') generateAISummary(newCase);
-}
-
-// ── Auto-init when DOM ready ──
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initOfflineManager);
-} else {
-  initOfflineManager();
-}
-
-</script>
-
-<script>
-// Time-based greeting
-(function(){
-  var h = new Date().getHours();
-  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  var el = document.getElementById('greeting-time');
-  if(el) el.textContent = g;
-})();
 </script>
 </body>
 </html>
