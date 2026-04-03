@@ -607,23 +607,37 @@ function toggleHamMenu() {
   document.body.style.overflow = d.classList.contains('open') ? 'hidden' : '';
 }
 
-// ── Profile photo upload ──
+// ── Profile photo upload — resize to max 600px before storing ──
 function handlePhotoUpload(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024) {
-    showAlert('Photo is too large. Maximum 3MB.'); return;
+  if (file.size > 5 * 1024 * 1024) {
+    showAlert('Photo is too large. Maximum 5MB.'); return;
   }
   const reader = new FileReader();
   reader.onload = e => {
-    profilePhotoData = { name: file.name, type: file.type || 'image/jpeg', dataUrl: e.target.result };
-    // Show preview
-    const img = document.getElementById('photo-img');
-    const placeholder = document.getElementById('photo-placeholder');
-    img.src = e.target.result;
-    img.style.display = 'block';
-    placeholder.style.display = 'none';
-    document.getElementById('photo-name').textContent = file.name;
+    // Resize using canvas — keeps file small enough for Apps Script POST
+    const image = new Image();
+    image.onload = () => {
+      const MAX = 600;
+      let w = image.width, h = image.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(image, 0, 0, w, h);
+      const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      profilePhotoData = { name: file.name.replace(/\.[^.]+$/, '.jpg'), type: 'image/jpeg', dataUrl: resizedDataUrl };
+      // Show preview
+      const img = document.getElementById('photo-img');
+      img.src = resizedDataUrl;
+      img.style.display = 'block';
+      document.getElementById('photo-placeholder').style.display = 'none';
+      document.getElementById('photo-name').textContent = profilePhotoData.name;
+    };
+    image.src = e.target.result;
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -717,11 +731,16 @@ async function submitRegistration() {
   const refNum = 'ATT-' + new Date().getFullYear() + '-' + String(Math.floor(100000 + Math.random() * 900000));
 
   try {
-    // 1. Upload profile photo if provided (same uploadFile action as case system)
+    // 1. Upload profile photo if provided — non-blocking, skip if fails
     let profilePhotoUrl = '';
     if (profilePhotoData) {
       submitBtn.innerHTML = '<span>⏳</span> Uploading photo…';
-      profilePhotoUrl = await uploadPhoto(refNum);
+      try {
+        profilePhotoUrl = await uploadPhoto(refNum);
+      } catch(photoErr) {
+        // Photo upload failed — continue without it, admin can add manually
+        console.warn('Photo upload skipped:', photoErr.message);
+      }
     }
 
     // 2. Save application — flat payload, matches Apps Script doPost reader
