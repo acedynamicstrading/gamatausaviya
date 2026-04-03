@@ -752,6 +752,7 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
       <button class="nav-tab admin-only" onclick="showTab('allcases')" style="display:none;">📂 All Cases</button>
       <button class="nav-tab admin-only" onclick="showTab('users')" style="display:none;">👥 Users</button>
       <button class="nav-tab admin-only" onclick="showTab('lawyers')" style="display:none;">⚖️ Legal Professionals</button>
+      <button class="nav-tab admin-only" onclick="showTab('lawyerdir')" style="display:none;">📋 Lawyer Directory</button>
       <button class="nav-tab admin-only" onclick="showTab('stats')" style="display:none;">📊 Statistics</button>
       <button class="nav-tab" onclick="showTab('track')">🔍 Track</button>
     </div>
@@ -993,9 +994,145 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
     </div>
 
   </div>
+
+    <!-- ══ LAWYER DIRECTORY TAB ══ -->
+    <div id="tab-lawyerdir" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:1.5rem;">Lawyer Directory</h2>
+          <p style="color:var(--muted);font-size:0.85rem;margin-top:3px;">Approved legal professionals shown to clients in the case wizard. Add, edit, or remove lawyers and notaries.</p>
+        </div>
+        <button class="btn-gold" onclick="openAddLawyer()">+ Add Legal Professional</button>
+      </div>
+
+      <div style="background:var(--navy-mid);border:1px solid var(--border);border-radius:var(--r);padding:20px;">
+        <div id="ld-loading" style="text-align:center;padding:32px;"><div class="ai-spinner-inline" style="justify-content:center;"><div class="ai-spin"></div> Loading directory…</div></div>
+        <div id="ld-empty" style="display:none;text-align:center;padding:40px;color:var(--muted);">No lawyers in directory yet. Add the first one above.</div>
+        <div id="ld-list" style="display:none;overflow-x:auto;">
+          <table class="case-table" style="width:100%;">
+            <thead><tr>
+              <th>Name</th><th>Reg No.</th><th>Type</th><th>District</th><th>Specialisations</th><th>Fee</th><th>Languages</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="ld-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
-<!-- LAWYER APP DETAIL MODAL -->
+<!-- ADD / EDIT LAWYER MODAL -->
+<div class="modal-overlay" id="lawyer-modal">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-header">
+      <div class="modal-title" id="lawyer-modal-title">Add Legal Professional</div>
+      <button class="modal-close" onclick="closeLawyerModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Full Name <span style="color:var(--red);">*</span></label>
+          <input type="text" id="lm-name" placeholder="e.g. W.A. Karunaratne">
+        </div>
+        <div class="field">
+          <label>Bar / Reg No. <span style="color:var(--red);">*</span></label>
+          <input type="text" id="lm-reg" placeholder="e.g. AAL/8871">
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Registration Type <span style="color:var(--red);">*</span></label>
+          <select id="lm-type">
+            <option value="">Select…</option>
+            <option value="PC">President's Counsel (PC)</option>
+            <option value="AAL">Attorney-at-Law (AAL)</option>
+            <option value="AAL+Notary">AAL & Notary Public</option>
+            <option value="Notary">Notary Public</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>District <span style="color:var(--red);">*</span></label>
+          <select id="lm-district">
+            <option value="">Select…</option>
+            <option>Colombo</option><option>Gampaha</option><option>Kalutara</option>
+            <option>Kandy</option><option>Matale</option><option>Nuwara Eliya</option>
+            <option>Galle</option><option>Matara</option><option>Hambantota</option>
+            <option>Jaffna</option><option>Kilinochchi</option><option>Mannar</option>
+            <option>Mullaitivu</option><option>Vavuniya</option><option>Trincomalee</option>
+            <option>Batticaloa</option><option>Ampara</option><option>Polonnaruwa</option>
+            <option>Anuradhapura</option><option>Puttalam</option><option>Kurunegala</option>
+            <option>Kegalle</option><option>Ratnapura</option><option>Badulla</option>
+            <option>Monaragala</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Mobile <span style="color:var(--red);">*</span></label>
+          <input type="tel" id="lm-mobile" placeholder="+94 77 XXX XXXX">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="lm-email" placeholder="optional">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Fee Range <span style="color:var(--red);">*</span></label>
+        <select id="lm-fee">
+          <option value="Rs.5,000–10,000">Entry — Rs.5,000–10,000 per case</option>
+          <option value="Rs.10,000–20,000" selected>Standard — Rs.10,000–20,000 per case</option>
+          <option value="Rs.20,000+">Senior — Rs.20,000+ per case</option>
+          <option value="Rate on request">Rate on request</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Specialisations <span style="color:var(--red);">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;" id="lm-specs-grid">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Land & Property"> 🏡 Land</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Family Law"> 👨‍👩‍👧 Family</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Debt Recovery"> 💰 Debt</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Criminal"> ⚖ Criminal</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Labour Law"> ⚒ Labour</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Contract"> 📝 Contract</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Consumer"> 🛒 Consumer</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Domestic Violence"> 🏠 DV</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Inheritance"> 📜 Inheritance</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Environmental"> 🌿 Environment</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="Notary Work"> 📋 Notary</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;"><input type="checkbox" value="General"> 📂 General</label>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Languages</label>
+        <div style="display:flex;gap:16px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="checkbox" id="lm-lang-si" value="si" checked> සිංහල</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="checkbox" id="lm-lang-ta" value="ta"> தமிழ்</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="checkbox" id="lm-lang-en" value="en" checked> English</label>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Professional Bio (shown on profile card)</label>
+        <textarea id="lm-bio" rows="3" placeholder="Brief description of practice and experience…" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--cream);font-size:0.88rem;resize:vertical;"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:14px;" id="lm-status-wrap">
+        <label>Status</label>
+        <select id="lm-status">
+          <option value="active">Active (shown to clients)</option>
+          <option value="inactive">Inactive (hidden from clients)</option>
+        </select>
+      </div>
+      <input type="hidden" id="lm-row" value="">
+      <input type="hidden" id="lm-id" value="">
+      <div id="lm-error" style="display:none;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);border-radius:5px;padding:10px;font-size:0.83rem;color:#e74c3c;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="btn-gold" onclick="saveLawyer()" id="lm-save-btn" style="flex:1;">Save</button>
+        <button class="btn-secondary" onclick="closeLawyerModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="la-modal">
   <div class="modal" style="max-width:640px;">
     <div class="modal-header">
@@ -1553,6 +1690,7 @@ let cases = [];
 let selectedAfford = null;
 let selectedCourt  = null;
 let selectedLawyer = null;
+let LAWYERS = []; // Loaded dynamically from Google Sheets
 let selectedCaseType = null;
 
 // ══════════════════════════════════
@@ -1584,7 +1722,7 @@ function showScreen(id) {
 }
 function showTab(tab) {
   if (tab === 'stats') loadStats();
-  ['dashboard','newcase','allcases','track','users','lawyers','stats'].forEach(t => {
+  ['dashboard','newcase','allcases','track','users','lawyers','lawyerdir','stats'].forEach(t => {
     const el = document.getElementById('tab-'+t);
     if (el) el.style.display = (t===tab)?'block':'none';
   });
@@ -1596,12 +1734,13 @@ function showTab(tab) {
   if (tab==='dashboard') renderDashboard();
   if (tab==='users')     loadUsers();
   if (tab==='lawyers')   loadLawyerApps();
+  if (tab==='lawyerdir') loadLawyerDirectory();
 }
 
 // ══════════════════════════════════
 //  GOOGLE SHEETS AUTH
 // ══════════════════════════════════
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz20nAEAeocp8zd99cyGRtq6Ax2KjnNj_YxxJyLRocmP2M0S9PmoobvY4Vn61PXZ9Wi7g/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw1-e3dMkRAptrvQoKY4KZhxtyE9Nyt7ZP8MVL8LltlpYtO8CdV-xo2ESmcJizjNGQkYg/exec';
 // ── Date formatter ──
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -1620,20 +1759,12 @@ function callSheets(payload) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Timeout')), 20000);
 
-    // Build URL params — Apps Script reads these via e.parameter
-    const params = new URLSearchParams();
-    Object.entries({ ...payload, secret: APP_SECRET }).forEach(([k, v]) => {
-      if (v !== null && v !== undefined) {
-        if (typeof v === 'object') params.append(k, JSON.stringify(v));
-        else params.append(k, String(v));
-      }
-    });
-
-    // text/plain avoids CORS preflight; Apps Script reads body via e.postData.contents
+    // Apps Script doPost reads JSON.parse(e.postData.contents)
+    // text/plain avoids CORS preflight
     fetch(SHEETS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: params.toString()
+      body: JSON.stringify({ ...payload, secret: APP_SECRET })
     })
     .then(r => r.text())
     .then(t => {
@@ -2471,11 +2602,35 @@ function selectAfford(v,el){
   document.getElementById('lac-panel').style.display=(v==='no'||v==='partial')?'block':'none';
   if(v==='yes') buildLawyerGrid();
 }
-function buildLawyerGrid(){
+async function buildLawyerGrid(){
   const dist=(document.getElementById('c-district')?.value)||'';
   const type=selectedCaseType||'';
+  // Load approved lawyers from Sheets
+  const grid=document.getElementById('lawyer-grid');
+  grid.innerHTML='<div style="color:var(--muted);font-size:0.85rem;padding:16px;">Loading registered lawyers…</div>';
+  try {
+    const res = await callSheets({ action:'listLawyers', district: dist });
+    if (res.ok && res.lawyers && res.lawyers.length > 0) {
+      LAWYERS = res.lawyers.map(l => ({
+        id: l.id, name: l.name, reg: l.reg, district: l.district,
+        avatar: l.regType === 'PC' ? '⚖️' : l.regType === 'Notary' ? '📜' : '👨‍⚖️',
+        specs: Array.isArray(l.specs) ? l.specs : (l.specs||'').split(',').map(s=>s.trim()),
+        fee: l.fee || 'Rate on request',
+        lang: Array.isArray(l.lang) ? l.lang : (l.lang||'si').split(',').map(s=>s.trim()),
+        bio: l.bio || '', mobile: l.mobile || '', photoUrl: l.photoUrl || ''
+      }));
+    } else {
+      LAWYERS = [];
+    }
+  } catch(e) {
+    LAWYERS = [];
+  }
   const typeLabels={land:'Land & Property',family:'Family Law',debt:'Debt Recovery',assault:'Criminal',labour:'Labour Law',criminal:'Criminal',contract:'Contract',consumer:'Consumer',domestic:'Domestic Violence',inheritance:'Inheritance',environment:'Environmental',other:''};
   const typeLabel=typeLabels[type]||'';
+  if (LAWYERS.length === 0) {
+    document.getElementById('lawyer-grid').innerHTML='<div style="color:var(--muted);font-size:0.85rem;padding:16px;">No registered lawyers found for this district yet. Contact Justice LK to find a lawyer.</div>';
+    return;
+  }
   // sort: same district first, then matching specialisation
   const sorted=[...LAWYERS].sort((a,b)=>{
     const aScore=(a.district===dist?10:0)+(a.specs.some(s=>s.includes(typeLabel.split(' ')[0]))?5:0);
@@ -2759,7 +2914,7 @@ function saveSettings() { closeSettings(); }
 
 // ── AI CALL — routes through LexLK Cloudflare Worker ──
 async function callAI(prompt, action) {
-  const resp = await fetch('https://lexlk.acedynamicstrading.workers.dev', {
+  const resp = await fetch('https://justiceslworker.acedynamicstrading.workers.dev', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -3440,6 +3595,205 @@ async function updateLawyerStatus(ref, newStatus) {
   }
 }
 
+// ══════════════════════════════════════════════════
+//  LAWYER DIRECTORY ADMIN
+// ══════════════════════════════════════════════════
+let lawyerDirCache = [];
+let editingLawyerRow = null;
+
+async function loadLawyerDirectory() {
+  document.getElementById('ld-loading').style.display = 'block';
+  document.getElementById('ld-list').style.display   = 'none';
+  document.getElementById('ld-empty').style.display  = 'none';
+
+  try {
+    const res = await callSheets({ action: 'listLawyers', district: 'All' });
+    const lawyers = res.lawyers || [];
+    lawyerDirCache = lawyers;
+
+    document.getElementById('ld-loading').style.display = 'none';
+
+    if (!lawyers.length) {
+      document.getElementById('ld-empty').style.display = 'block';
+      return;
+    }
+
+    const tbody = document.getElementById('ld-tbody');
+    tbody.innerHTML = lawyers.map(l => `
+      <tr>
+        <td><strong>${l.name}</strong></td>
+        <td><span style="font-family:monospace;font-size:0.82rem;color:var(--gold);">${l.reg}</span></td>
+        <td style="font-size:0.78rem;">${l.regType || '—'}</td>
+        <td>${l.district}</td>
+        <td style="font-size:0.75rem;color:var(--muted);">${(Array.isArray(l.specs)?l.specs:l.specs||'').toString().split(',').slice(0,2).join(', ')}${(Array.isArray(l.specs)?l.specs:[]).length>2?'…':''}</td>
+        <td style="font-size:0.78rem;">${l.fee}</td>
+        <td style="font-size:0.75rem;">${(Array.isArray(l.lang)?l.lang:[]).map(x=>({si:'සිංහල',ta:'தமிழ்',en:'EN'}[x]||x)).join(', ')}</td>
+        <td>${l.status==='active'
+          ? '<span class="status-pill pill-submitted">Active</span>'
+          : '<span class="status-pill pill-pending">Inactive</span>'}</td>
+        <td><div class="action-btns">
+          <button class="btn-sm btn-sm-teal" onclick="openEditLawyer('${l.id}')">Edit</button>
+          <button class="btn-sm" style="background:rgba(192,57,43,0.15);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);"
+            onclick="confirmDeleteLawyer('${l.id}','${l.name}',${l.row})">🗑</button>
+        </div></td>
+      </tr>`).join('');
+
+    document.getElementById('ld-list').style.display = 'block';
+  } catch(e) {
+    document.getElementById('ld-loading').style.display = 'none';
+    document.getElementById('ld-empty').style.display  = 'block';
+    document.getElementById('ld-empty').textContent    = 'Error: ' + e.message;
+  }
+}
+
+function openAddLawyer() {
+  editingLawyerRow = null;
+  document.getElementById('lawyer-modal-title').textContent = 'Add Legal Professional';
+  document.getElementById('lm-name').value = '';
+  document.getElementById('lm-reg').value  = '';
+  document.getElementById('lm-type').value = '';
+  document.getElementById('lm-district').value = '';
+  document.getElementById('lm-mobile').value = '';
+  document.getElementById('lm-email').value  = '';
+  document.getElementById('lm-fee').value = 'Rs.10,000–20,000';
+  document.getElementById('lm-bio').value = '';
+  document.getElementById('lm-status').value = 'active';
+  document.getElementById('lm-row').value = '';
+  document.getElementById('lm-id').value  = '';
+  document.getElementById('lm-error').style.display = 'none';
+  document.getElementById('lm-save-btn').textContent = 'Add Lawyer';
+  // Reset checkboxes
+  document.querySelectorAll('#lm-specs-grid input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.getElementById('lm-lang-si').checked = true;
+  document.getElementById('lm-lang-en').checked = true;
+  document.getElementById('lm-lang-ta').checked = false;
+  document.getElementById('lawyer-modal').classList.add('open');
+}
+
+function openEditLawyer(id) {
+  const l = lawyerDirCache.find(x => x.id === id);
+  if (!l) return;
+  editingLawyerRow = l.row;
+  document.getElementById('lawyer-modal-title').textContent = 'Edit — ' + l.name;
+  document.getElementById('lm-name').value    = l.name    || '';
+  document.getElementById('lm-reg').value     = l.reg     || '';
+  document.getElementById('lm-type').value    = l.regType || '';
+  document.getElementById('lm-district').value= l.district|| '';
+  document.getElementById('lm-mobile').value  = l.mobile  || '';
+  document.getElementById('lm-email').value   = l.email   || '';
+  document.getElementById('lm-fee').value     = l.fee     || 'Rs.10,000–20,000';
+  document.getElementById('lm-bio').value     = l.bio     || '';
+  document.getElementById('lm-status').value  = l.status  || 'active';
+  document.getElementById('lm-row').value     = l.row;
+  document.getElementById('lm-id').value      = l.id;
+  document.getElementById('lm-error').style.display = 'none';
+  document.getElementById('lm-save-btn').textContent = 'Save Changes';
+
+  // Set specs
+  const specsArr = Array.isArray(l.specs) ? l.specs : (l.specs||'').split(',').map(s=>s.trim());
+  document.querySelectorAll('#lm-specs-grid input[type=checkbox]').forEach(cb => {
+    cb.checked = specsArr.some(s => s.toLowerCase().includes(cb.value.toLowerCase().split(' ')[0].toLowerCase()));
+  });
+  // Set languages
+  const langArr = Array.isArray(l.lang) ? l.lang : (l.lang||'').split(',').map(s=>s.trim());
+  document.getElementById('lm-lang-si').checked = langArr.includes('si');
+  document.getElementById('lm-lang-ta').checked = langArr.includes('ta');
+  document.getElementById('lm-lang-en').checked = langArr.includes('en');
+
+  document.getElementById('lawyer-modal').classList.add('open');
+}
+
+function closeLawyerModal() {
+  document.getElementById('lawyer-modal').classList.remove('open');
+}
+
+async function saveLawyer() {
+  const name    = document.getElementById('lm-name').value.trim();
+  const reg     = document.getElementById('lm-reg').value.trim();
+  const type    = document.getElementById('lm-type').value;
+  const district= document.getElementById('lm-district').value;
+  const mobile  = document.getElementById('lm-mobile').value.trim();
+  const errEl   = document.getElementById('lm-error');
+  const btn     = document.getElementById('lm-save-btn');
+
+  if (!name || !reg || !type || !district || !mobile) {
+    errEl.textContent = 'Please fill in all required fields (Name, Reg No., Type, District, Mobile).';
+    errEl.style.display = 'block'; return;
+  }
+
+  const specs = [...document.querySelectorAll('#lm-specs-grid input[type=checkbox]:checked')].map(cb => cb.value);
+  const lang  = ['si','ta','en'].filter(l => document.getElementById('lm-lang-'+l)?.checked);
+
+  if (!specs.length) {
+    errEl.textContent = 'Please select at least one specialisation.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  errEl.style.display = 'none';
+
+  try {
+    let result;
+    if (!editingLawyerRow) {
+      result = await callSheets({
+        action: 'addLawyer',
+        name, reg, district, regType: type,
+        mobile, email: document.getElementById('lm-email').value.trim(),
+        fee:    document.getElementById('lm-fee').value,
+        bio:    document.getElementById('lm-bio').value.trim(),
+        status: document.getElementById('lm-status').value,
+        specs, lang
+      });
+    } else {
+      result = await callSheets({
+        action: 'updateLawyer',
+        row:    parseInt(document.getElementById('lm-row').value),
+        name, reg, district, regType: type,
+        mobile, email: document.getElementById('lm-email').value.trim(),
+        fee:    document.getElementById('lm-fee').value,
+        bio:    document.getElementById('lm-bio').value.trim(),
+        status: document.getElementById('lm-status').value,
+        specs, lang
+      });
+    }
+
+    if (result.ok) {
+      closeLawyerModal();
+      showAlert('✓ Lawyer directory updated.', 'success');
+      await loadLawyerDirectory();
+    } else {
+      errEl.textContent = result.error || 'Could not save. Try again.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Network error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+
+  btn.textContent = editingLawyerRow ? 'Save Changes' : 'Add Lawyer';
+  btn.disabled = false;
+}
+
+function confirmDeleteLawyer(id, name, row) {
+  if (!confirm('Remove "' + name + '" from the lawyer directory? This cannot be undone.')) return;
+  deleteLawyer(id, name, row);
+}
+
+async function deleteLawyer(id, name, row) {
+  try {
+    showAlert('Removing ' + name + '...', 'info');
+    const result = await callSheets({ action: 'deleteLawyer', row: parseInt(row) });
+    if (result && result.ok) {
+      showAlert(name + ' removed from directory.', 'success');
+      await loadLawyerDirectory();
+    } else {
+      showAlert('Could not remove: ' + (result?.error || 'Unknown error'), 'error');
+    }
+  } catch(e) {
+    showAlert('Error: ' + e.message, 'error');
+  }
+}
+
 //  SERVICE WORKER + PWA
 // ══════════════════════════════════
 let deferredInstallPrompt = null;
@@ -3846,7 +4200,7 @@ async function triggerSync(source) {
 }
 
 async function syncDirectly(pendingCases) {
-  const WORKER = 'https://lexlk.acedynamicstrading.workers.dev';
+  const WORKER = 'https://justiceslworker.acedynamicstrading.workers.dev';
   let synced = 0, failed = 0;
 
   for (const caseData of pendingCases) {
@@ -4147,7 +4501,7 @@ async function submitCase() {
   const btn = document.querySelector('[onclick="submitCase()"]');
 
   // Build case data object (same as original)
-  const token = 'GU-' + new Date().getFullYear() + '-' + String(100000 + (cases?.length || 0) + 1).slice(1);
+  const token = 'GU-' + new Date().getFullYear() + '-' + String(Math.floor(100000 + Math.random() * 900000));
   const clientName = document.getElementById('c-name')?.value || 'Unknown';
 
   const newCase = {
