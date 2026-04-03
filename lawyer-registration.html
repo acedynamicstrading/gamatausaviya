@@ -427,19 +427,18 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;}
           </div>
         </div>
         <div class="form-grid" style="margin-top:14px;">
-          <div class="field">
+          <div class="field" style="grid-column:1/-1;">
             <label>Courts of Practice <span class="req">*</span></label>
-            <select id="f-courts" multiple style="min-height:90px;">
-              <option>District Court</option>
-              <option>Magistrates' Court</option>
-              <option>High Court</option>
-              <option>Court of Appeal</option>
-              <option>Supreme Court</option>
-              <option>Labour Tribunal</option>
-              <option>Family Court</option>
-              <option>Commercial High Court</option>
-            </select>
-            <span class="hint">Hold Ctrl / Cmd to select multiple courts</span>
+            <div class="native-check-grid" id="courts-grid" style="margin-top:6px;">
+              <label class="native-check-label"><input type="checkbox" id="court-district" value="District Court"> 🏛 District Court</label>
+              <label class="native-check-label"><input type="checkbox" id="court-magistrate" value="Magistrates Court"> ⚖ Magistrates' Court</label>
+              <label class="native-check-label"><input type="checkbox" id="court-high" value="High Court"> 🏦 High Court</label>
+              <label class="native-check-label"><input type="checkbox" id="court-appeal" value="Court of Appeal"> 📋 Court of Appeal</label>
+              <label class="native-check-label"><input type="checkbox" id="court-supreme" value="Supreme Court"> 👑 Supreme Court</label>
+              <label class="native-check-label"><input type="checkbox" id="court-labour" value="Labour Tribunal"> 👷 Labour Tribunal</label>
+              <label class="native-check-label"><input type="checkbox" id="court-family" value="Family Court"> 👨‍👩‍👧 Family Court</label>
+              <label class="native-check-label"><input type="checkbox" id="court-commercial" value="Commercial High Court"> 💼 Commercial High Court</label>
+            </div>
           </div>
           <div class="field">
             <label>Languages of Practice <span class="req">*</span></label>
@@ -700,7 +699,7 @@ async function submitRegistration() {
   const langs = ['si','ta','en'].filter(l => document.getElementById('lang-'+l)?.checked);
   if (langs.length === 0) { showAlert('Please select at least one language of practice.'); return; }
 
-  const selectedCourts = [...document.getElementById('f-courts').selectedOptions].map(o=>o.value);
+  const selectedCourts = [...document.querySelectorAll('#courts-grid input[type=checkbox]:checked')].map(cb=>cb.value);
   if (selectedCourts.length === 0) { showAlert('Please select at least one court of practice.'); return; }
 
   if (!document.getElementById('c1').checked || !document.getElementById('c2').checked ||
@@ -790,8 +789,7 @@ function resetForm() {
   document.getElementById('photo-placeholder').style.display = '';
   document.getElementById('photo-name').textContent = '';
   // Reset courts
-  const courtsEl = document.getElementById('f-courts');
-  if(courtsEl) [...courtsEl.options].forEach(opt => { opt.selected = false; });
+  document.querySelectorAll('#courts-grid input[type=checkbox]').forEach(cb => { cb.checked = false; });
 }
 
 // ── Smooth scroll ──
