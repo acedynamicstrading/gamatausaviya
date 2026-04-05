@@ -773,6 +773,21 @@ h1,h2,h3{font-family:'DM Serif Display',serif;}
 
     <!-- DASHBOARD TAB -->
     <div id="tab-dashboard">
+      <!-- Offline sync banner — shown only when pending cases exist -->
+      <div id="dashboard-sync-banner" style="display:none;background:rgba(212,130,42,0.12);border:1px solid rgba(212,130,42,0.4);border-radius:8px;padding:14px 18px;margin-bottom:20px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">📵</span>
+          <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#E8A04A;" id="sync-banner-title">Cases saved offline</div>
+            <div style="font-size:0.78rem;color:var(--muted);" id="sync-banner-desc">These will upload to Google Drive automatically when you reconnect.</div>
+          </div>
+        </div>
+        <button onclick="triggerSync('manual')" id="dashboard-sync-btn"
+          style="background:#E8A04A;color:var(--navy);border:none;padding:9px 20px;border-radius:6px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;">
+          🔄 Upload Now
+        </button>
+      </div>
+
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
         <div>
           <h2 style="font-size:1.5rem;"><span id="greeting-time">Good morning</span>, <span id="officer-name-display">Officer</span></h2>
@@ -1692,6 +1707,8 @@ let selectedCourt  = null;
 let selectedLawyer = null;
 let LAWYERS = []; // Loaded dynamically from Google Sheets
 let selectedCaseType = null;
+let currentCaseForSummary = null;
+let currentAISummary = '';
 
 // ══════════════════════════════════
 //  ALERTS / TOASTS
@@ -1824,6 +1841,21 @@ async function doLogin() {
   }
 
   errEl.style.display = 'none';
+
+  // ── Check connectivity FIRST — skip server entirely if offline ──
+  if (!navigator.onLine) {
+    const cached = JSON.parse(localStorage.getItem('gu_cached_users') || '[]');
+    const match  = cached.find(u => u.username === username && u.password === password && u.status !== 'inactive');
+    if (match) {
+      applyLogin(match);
+      showOfflineBanner('Logged in offline. Changes will sync when you reconnect.');
+    } else {
+      errEl.textContent = 'You are offline and this device has no saved credentials for "' + username + '". Please log in once while connected to internet first.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
   btn.style.display = 'none';
   spinner.style.display = 'block';
 
@@ -1832,27 +1864,9 @@ async function doLogin() {
 
     if (result.ok) {
       const user = result.user;
-      currentUser     = user.username;
-      currentRole     = user.role;
-      currentUserName = user.name;
-      currentDistrict = user.district;
-      currentUserRow  = user.row;
-
-      document.getElementById('user-badge').textContent =
-        (user.role==='admin'?'🛡 ':'🧑‍💼 ') + user.name;
-      document.getElementById('officer-name-display').textContent = user.name;
-
-      // Show/hide admin-only elements
-      document.querySelectorAll('.admin-only').forEach(e =>
-        e.style.display = user.role==='admin' ? '' : 'none'
-      );
-      // Show correct AI badge
-      const officerBadge = document.getElementById('ai-indicator-officer');
-      if (officerBadge) officerBadge.style.display = user.role==='admin' ? 'none' : '';
-
-      showScreen('app');
-      showTab('dashboard');
-      // Load cases from Google Sheets
+      // ── Cache immediately for offline logins ──
+      cacheUserCredentials({ ...user, password });
+      applyLogin(user);
       loadCasesFromSheets();
     } else {
       errEl.textContent = result.error || 'Login failed. Please try again.';
@@ -1863,27 +1877,49 @@ async function doLogin() {
   } catch(e) {
     // Offline fallback — check localStorage cached credentials
     const cached = JSON.parse(localStorage.getItem('gu_cached_users') || '[]');
-    const match  = cached.find(u => u.username===username && u.password===password && u.status==='active');
+    const match  = cached.find(u => u.username === username && u.password === password && u.status !== 'inactive');
     if (match) {
-      currentUser     = match.username;
-      currentRole     = match.role;
-      currentUserName = match.name;
-      currentDistrict = match.district;
-      currentUserRow  = match.row || 0;
-      document.getElementById('user-badge').textContent = (match.role==='admin'?'🛡 ':'🧑‍💼 ')+match.name;
-      document.getElementById('officer-name-display').textContent = match.name;
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = match.role==='admin'?'':'none');
-      const ob = document.getElementById('ai-indicator-officer');
-      if (ob) ob.style.display = match.role==='admin' ? 'none' : '';
-      showScreen('app'); showTab('dashboard');
-      showOfflineBanner('Logged in offline using cached credentials.');
+      applyLogin(match);
+      showOfflineBanner('Server unreachable — logged in using saved credentials.');
     } else {
-      errEl.textContent = 'Cannot reach server. Check internet connection. (' + e.message + ')';
+      errEl.textContent = 'Cannot reach server. Check your internet connection. (' + e.message + ')';
       errEl.style.display = 'block';
       btn.style.display = 'block';
       spinner.style.display = 'none';
     }
   }
+}
+
+// ── Shared login state setter ──
+function applyLogin(user) {
+  currentUser     = user.username;
+  currentRole     = user.role;
+  currentUserName = user.name;
+  currentDistrict = user.district;
+  currentUserRow  = user.row || 0;
+  document.getElementById('user-badge').textContent = (user.role==='admin'?'🛡 ':'🧑‍💼 ') + user.name;
+  document.getElementById('officer-name-display').textContent = user.name;
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = user.role==='admin' ? '' : 'none');
+  const officerBadge = document.getElementById('ai-indicator-officer');
+  if (officerBadge) officerBadge.style.display = user.role==='admin' ? 'none' : '';
+  showScreen('app');
+  showTab('dashboard');
+}
+
+// ── Cache credentials for offline login ──
+function cacheUserCredentials(user) {
+  try {
+    const cached = JSON.parse(localStorage.getItem('gu_cached_users') || '[]');
+    const idx = cached.findIndex(u => u.username === user.username);
+    const entry = {
+      username: user.username, password: user.password,
+      name: user.name, district: user.district,
+      role: user.role, status: user.status || 'active',
+      row: user.row || 0, cachedAt: new Date().toISOString()
+    };
+    if (idx >= 0) cached[idx] = entry; else cached.push(entry);
+    localStorage.setItem('gu_cached_users', JSON.stringify(cached));
+  } catch(e) { console.warn('[Login] Could not cache credentials:', e); }
 }
 
 // Keep Enter key working
@@ -4200,42 +4236,55 @@ async function triggerSync(source) {
 }
 
 async function syncDirectly(pendingCases) {
-  const WORKER = 'https://justiceslworker.acedynamicstrading.workers.dev';
   let synced = 0, failed = 0;
 
   for (const caseData of pendingCases) {
     try {
-      const res = await fetch(WORKER, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action:         'saveCase',
-          token:          caseData.token,
-          clientName:     caseData.client,
-          nic:            caseData.nic,
-          mobile:         caseData.mobile,
-          district:       caseData.district,
-          caseType:       caseData.caseType,
-          status:         caseData.status || 'Pending',
-          officer:        caseData.officer,
-          created:        caseData.created,
-          court:          caseData.court,
-          route:          caseData.route,
-          facts:          caseData.facts,
-          brief:          caseData.brief,
-          relief:         caseData.relief,
-          lawyer:         caseData.lawyer ? `${caseData.lawyer.name} (${caseData.lawyer.reg})` : '',
-          offlineSync:    true,
-          savedOfflineAt: caseData.savedAt,
-        })
+      // ── Step 1: Save case metadata to Google Sheets ──
+      const saveResult = await callSheets({
+        action:         'saveCase',
+        token:          caseData.token,
+        clientName:     caseData.client,
+        nic:            caseData.nic,
+        mobile:         caseData.mobile,
+        district:       caseData.district,
+        caseType:       caseData.caseType,
+        status:         caseData.status || 'Pending',
+        officer:        caseData.officer,
+        created:        caseData.created,
+        court:          caseData.court,
+        route:          caseData.route,
+        facts:          caseData.facts,
+        brief:          caseData.brief,
+        relief:         caseData.relief,
+        lawyer:         caseData.lawyer ? `${caseData.lawyer.name} (${caseData.lawyer.reg})` : '',
+        offlineSync:    true,
+        savedOfflineAt: caseData.savedAt,
       });
 
-      if (res.ok) {
-        await markCaseSynced(caseData.token);
-        synced++;
-      } else {
-        failed++;
+      if (!saveResult.ok) { failed++; continue; }
+
+      // ── Step 2: Upload files to Google Drive ──
+      const files = caseData.files || [];
+      for (const f of files) {
+        try {
+          const base64 = f.dataUrl ? f.dataUrl.split(',')[1] : null;
+          if (!base64) continue;
+          await callSheets({
+            action:     'uploadFile',
+            token:      caseData.token,
+            clientName: caseData.client,
+            filename:   f.name,
+            mimeType:   f.type || 'application/octet-stream',
+            base64data: base64
+          });
+        } catch(fileErr) {
+          console.warn('[Sync] File upload failed:', f.name, fileErr.message);
+        }
       }
+
+      await markCaseSynced(caseData.token);
+      synced++;
     } catch(e) {
       failed++;
     }
@@ -4256,10 +4305,24 @@ function handleSyncComplete(msg) {
     showOfflineToast(`❌ Sync failed for ${failed} case(s). Will retry when connection is stable.`, 'error', 6000);
   }
 
-  // Update badge
+  // Update badge and dashboard banner
   countPendingCases().then(count => {
     updateSyncBadge(count);
     updateSyncButton(count > 0 ? 'pending' : 'clear');
+    if (count === 0 && synced > 0) {
+      const banner = document.getElementById('dashboard-sync-banner');
+      const title  = document.getElementById('sync-banner-title');
+      const desc   = document.getElementById('sync-banner-desc');
+      if (banner && title && desc) {
+        banner.style.background  = 'rgba(39,174,96,0.12)';
+        banner.style.borderColor = 'rgba(39,174,96,0.4)';
+        title.textContent = `✅ ${synced} case${synced > 1 ? 's' : ''} uploaded successfully`;
+        desc.textContent  = 'All offline cases are now saved to Google Drive.';
+        title.style.color = 'var(--green-bright)';
+        banner.style.display = 'flex';
+        setTimeout(() => { banner.style.display = 'none'; }, 5000);
+      }
+    }
   });
 }
 
@@ -4435,18 +4498,29 @@ function updateOnlineIndicator(isOnline) {
 }
 
 function updateSyncBadge(count) {
+  // ── Top bar badge + button ──
   const badge   = document.getElementById('sync-badge');
   const syncBtn = document.getElementById('sync-btn');
-  if (!badge || !syncBtn) return;
+  if (badge)   { badge.style.display   = count > 0 ? 'inline-block' : 'none'; badge.textContent = `${count} pending`; }
+  if (syncBtn) { syncBtn.style.display = count > 0 ? 'inline-flex'  : 'none'; }
+  if (count > 0) updateSyncButton('pending');
 
+  // ── Dashboard banner ──
+  const banner  = document.getElementById('dashboard-sync-banner');
+  const dashBtn = document.getElementById('dashboard-sync-btn');
+  if (!banner) return;
   if (count > 0) {
-    badge.style.display   = 'inline-block';
-    badge.textContent     = `${count} pending`;
-    syncBtn.style.display = 'inline-flex';
-    updateSyncButton('pending');
+    const online = navigator.onLine;
+    const title  = document.getElementById('sync-banner-title');
+    const desc   = document.getElementById('sync-banner-desc');
+    if (title) title.textContent = `${count} case${count > 1 ? 's' : ''} saved offline`;
+    if (desc)  desc.textContent  = online
+      ? "You're back online. Click Upload Now to send them to Google Drive."
+      : 'Will upload automatically when you reconnect. Or tap Upload Now when online.';
+    if (dashBtn) dashBtn.style.opacity = online ? '1' : '0.5';
+    banner.style.display = 'flex';
   } else {
-    badge.style.display   = 'none';
-    syncBtn.style.display = 'none';
+    banner.style.display = 'none';
   }
 }
 
