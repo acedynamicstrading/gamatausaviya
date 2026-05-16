@@ -2950,6 +2950,53 @@ function saveSettings() { closeSettings(); }
 
 // ── AI CALL — routes through LexLK Cloudflare Worker ──
 async function callAI(prompt, action) {
+  // Offline mode
+  if (aiProvider === 'offline') {
+    throw new Error('AI offline — enter content manually');
+  }
+
+  // Groq — called directly from browser using stored API key
+  if (aiProvider === 'groq') {
+    const key = localStorage.getItem('gu_groq_key') || '';
+    if (!key) throw new Error('No Groq API key set — open ⚙ Settings to add one');
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error('Groq error: ' + (err.error?.message || resp.status));
+    }
+    const data = await resp.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
+  // Ollama — local model
+  if (aiProvider === 'ollama') {
+    const model = localStorage.getItem('gu_ollama_model') || 'llama3';
+    const resp = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        stream: false
+      })
+    });
+    if (!resp.ok) throw new Error('Ollama error: ' + resp.status + ' — is Ollama running?');
+    const data = await resp.json();
+    return data.message?.content || '';
+  }
+
+  // Fallback: worker (claude or unknown provider)
   const resp = await fetch('https://justiceslworker.acedynamicstrading.workers.dev', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
